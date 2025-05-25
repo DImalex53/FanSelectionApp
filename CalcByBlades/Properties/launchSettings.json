@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "BladesCalc": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:61324;http://localhost:61325"
+    }
+  }
+}
