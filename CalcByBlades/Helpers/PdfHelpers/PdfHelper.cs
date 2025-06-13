@@ -6,7 +6,6 @@ using System.Diagnostics;
 using BladesCalc.Models;
 using ScottPlot;
 using BladesCalc.Helpers.GetMomentOfInertciaHelper;
-using BladesCalc.Helpers.AerodynamicHelpers;
 
 namespace BladesCalc.Helpers.PdfHelpers;
 

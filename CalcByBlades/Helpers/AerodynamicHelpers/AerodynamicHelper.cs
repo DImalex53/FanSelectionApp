@@ -1,6 +1,5 @@
 ﻿using BladesCalc.Helpers.PdfHelpers;
 using BladesCalc.Models;
-using static iText.IO.Image.Jpeg2000ImageData;
 
 namespace BladesCalc.Helpers.AerodynamicHelpers;
 
@@ -17,9 +16,9 @@ public static class AerodinamicHelper
 
         return aerodynamicsByTypeBlades.ToList();
     }
-    public static DatasRightSchemes GetRowOfRightSchemes (List<AerodynamicsDataBlades> datas, CalculationParameters parameters)
+    public static DatasRightSchemes GetRowOfRightSchemes (List<AerodynamicsDataBlades> datas, CalculationParameters parameters, ParametersDrawImage parametersDrawImage)
     {
-        return PaintDiagramsHelper.GenerateTableOfRightSchemes(datas, parameters).FirstOrDefault(d => d.Scheme == parameters.RightSchemeChoose);
+        return PaintDiagramsHelper.GenerateTableOfRightSchemes(datas, parameters, parametersDrawImage).FirstOrDefault(d => d.Scheme == parameters.RightSchemeChoose);
     }
     public static AerodynamicsDataBlades GetAerodynamicByTypeBladesRow (List<AerodynamicsDataBlades> datas, CalculationParameters parameters)
     {

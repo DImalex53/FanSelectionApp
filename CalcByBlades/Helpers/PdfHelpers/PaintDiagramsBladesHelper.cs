@@ -22,6 +22,8 @@ public static class PaintDiagramsHelper
         var imageFormat = parametersDrawImage.ImageFormat;
         int rpm;
         int nomberOfScheme = 0;
+        int maxHalfPoluces = 6;
+        if (parameters.NalichieVFD == 1) { maxHalfPoluces = 61;}
 
         for (int nomberOfRow = 0; nomberOfRow < aerodynamicsByTypeBlades.Count; nomberOfRow++)
         {
@@ -44,14 +46,11 @@ public static class PaintDiagramsHelper
 
             var nameOfFan = aerodynamicRowBlades.NewMarkOfFan;
 
-            if (parameters.SuctionType == 1)
-            {
-                nameOfFan = aerodynamicRowBlades.NewMarkOfFand;
-            }
+            if (parameters.SuctionType == 1) {nameOfFan = aerodynamicRowBlades.NewMarkOfFand;}
 
             for (int k = 0; diameter < MaxDiameter; k++)
             {
-                for (int halfPoluces = 1; halfPoluces <= 5; halfPoluces++)
+                for (int halfPoluces = 1; halfPoluces < maxHalfPoluces; halfPoluces++)
                 {
                     rpm = MaxRPM / halfPoluces;
 
@@ -136,7 +135,7 @@ public static class PaintDiagramsHelper
                             DiagramAsImageBytes = aerodynamicPlotBytes,
                         });
 
-                        halfPoluces = 6;
+                        halfPoluces = maxHalfPoluces;
                     }
                 }
                 diameter = diameter + 0.5;

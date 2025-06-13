@@ -1,11 +1,7 @@
 ﻿using BladesCalc.Helpers.AerodynamicHelpers;
 using ScottPlot;
 using System.IO;
-using static iText.IO.Image.Jpeg2000ImageData;
-using System.Runtime.Intrinsics.Arm;
 using BladesCalc.Models;
-using BladesCalc.Helpers.PdfHelpers;
-using System.Data;
 
 namespace BladesCalc.Helpers.PdfHelpers;
 public static class PaintDiagramHelper

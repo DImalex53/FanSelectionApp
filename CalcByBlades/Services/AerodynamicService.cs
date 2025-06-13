@@ -1,8 +1,7 @@
-﻿using BladesCalc.Helpers.PdfHelpers;
+﻿using BladesCalc.Helpers.AerodynamicHelpers;
+using BladesCalc.Helpers.PdfHelpers;
 using BladesCalc.Models;
 using BladesCalc.Repositories;
-using ScottPlot;
-using System.Runtime.Intrinsics.Arm;
 
 namespace BladesCalc.Services;
 
@@ -14,9 +13,32 @@ public class AerodynamicService(IAerodynamicsDataBladesRepository aerodynamicsDa
     {
         var allData = (await _aerodynamicsDataRepository.GetAllAsync()).ToList();
 
-        var tableOfRightSchemes = PaintDiagramsHelper.GenerateTableOfRightSchemes(allData, parameters, parametersDrawImage);
+        var aerodinamicByTypeBladesRow = AerodinamicHelper.GetAerodynamicByTypeBladesRow (allData, parameters);
+        var rowOfRightSchemes = AerodinamicHelper.GetRowOfRightSchemes(allData, parameters, parametersDrawImage);
 
-        if (tableOfRightSchemes == null) return;
+        var staticPressure1 = aerodinamicByTypeBladesRow.StaticPressure1;
+        var staticPressure2 = aerodinamicByTypeBladesRow.StaticPressure2;
+        var staticPressure3 = aerodinamicByTypeBladesRow.StaticPressure3;
+        var minDeltaEfficiency = aerodinamicByTypeBladesRow.MinDeltaEfficiency;
+        var maxDeltaEfficiency = aerodinamicByTypeBladesRow.MinDeltaEfficiency;
+        var outletLength = aerodinamicByTypeBladesRow.OutletLength;
+        var outletWidth = aerodinamicByTypeBladesRow.OutletWidth;
+        var efficiency1 = aerodinamicByTypeBladesRow.Efficiency1;
+        var efficiency2 = aerodinamicByTypeBladesRow.Efficiency2;
+        var efficiency3 = aerodinamicByTypeBladesRow.Efficiency3;
+        var efficiency4 = aerodinamicByTypeBladesRow.Efficiency4;
+        var newMarkOfFan = aerodinamicByTypeBladesRow.NewMarkOfFan;
+        var newMarkOfFand = aerodinamicByTypeBladesRow.NewMarkOfFand;
+        var diameter = rowOfRightSchemes.Diameter;
+        var rpm = rowOfRightSchemes.Rpm;
+        var impellerWidth = aerodinamicByTypeBladesRow.ImpellerWidth;
+        var bladeWidth = aerodinamicByTypeBladesRow.BladeWidth;
+        var bladeLength = aerodinamicByTypeBladesRow.BladeLength;
+        var numberOfBlades = aerodinamicByTypeBladesRow.NumberOfBlades;
+        var impellerInletDiameter = aerodinamicByTypeBladesRow.ImpellerInletDiameter;
+        var typeOfBlades = aerodinamicByTypeBladesRow.TypeOfBlades;
+
+        if (aerodinamicByTypeBladesRow == null) return;
 
         var aerodynamicPlot = PaintDiagramHelper.GetDiagrameDraw(
             parameters,
@@ -55,8 +77,8 @@ public class AerodynamicService(IAerodynamicsDataBladesRepository aerodynamicsDa
 
         if (aerodynamicPlot == null) return;
 
-        string reportPath = Path.Combine("wwwroot", "reports", "report.pdf");
-        Directory.CreateDirectory(Path.GetDirectoryName(reportPath)!);
+        string pdfPath = Path.Combine("wwwroot", "reports", "report.pdf");
+        Directory.CreateDirectory(Path.GetDirectoryName(pdfPath)!);
 
         PdfExporter.ExportToPdf(
             aerodynamicPlot,

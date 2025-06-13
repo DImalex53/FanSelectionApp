@@ -11,7 +11,7 @@ public class AerodynamicsController(IAerodynamicService calculationService) : Co
     private readonly IAerodynamicService _service = calculationService;
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] CalculationParameters parameters)
+    public async Task<IActionResult> Post([FromBody] CalculationParameters parameters, ParametersDrawImage parametersDrawImage)
     {
         if (parameters == null)
             return BadRequest("Параметры не могут быть пустыми");
@@ -19,7 +19,7 @@ public class AerodynamicsController(IAerodynamicService calculationService) : Co
         if (parameters.FlowRateRequired <= 0)
             return BadRequest("Расход должен быть положительным числом");
 
-        await _service.DownloadFileAsync(parameters);
+        await _service.DownloadFileAsync(parameters, parametersDrawImage);
 
         return Ok();
     }
