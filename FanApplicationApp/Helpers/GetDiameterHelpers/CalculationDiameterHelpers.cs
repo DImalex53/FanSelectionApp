@@ -7,7 +7,7 @@ public static class CalculationDiameterHelper
 {
     private readonly static double Accuracy = 0.01;
     private readonly static double MaxDiameter = 3;
-    public static double GetDiameter(List<AerodynamicsData> datas, CalculationParameters parameters)
+    public static double GetDiameter(List<AerodynamicsData> datas, SpeedCalculationParameters parameters)
     {
         double polinomCoefficientI1 = GetPolinomCoefficientI1(datas, parameters);
         double polinomCoefficientI2 = GetPolinomCoefficientI2(datas, parameters);
@@ -37,7 +37,7 @@ public static class CalculationDiameterHelper
 
         return diameter;
     }
-    public static double GetSpeed(CalculationParameters parameters)
+    public static double GetSpeed(SpeedCalculationParameters parameters)
     {
         double PressureReserve = 1.05;
         double DensityNormal = 1.204;
@@ -55,7 +55,7 @@ public static class CalculationDiameterHelper
         return speed;
     }
 
-    private static double GetPolinomValue(double diameter, double polinomCoefficientI3, CalculationParameters parameters,
+    private static double GetPolinomValue(double diameter, double polinomCoefficientI3, SpeedCalculationParameters parameters,
         double polinomCoefficientI1, double polinomCoefficientI2)
     {
         double polinomPressure = polinomCoefficientI1 + polinomCoefficientI2 * Math.Pow(diameter, 3) + polinomCoefficientI3 *
@@ -63,7 +63,7 @@ public static class CalculationDiameterHelper
         return polinomPressure;
     }
 
-    private static double GetPolinomDiffValue(double diameter, double polinomCoefficientI3, CalculationParameters parameters,
+    private static double GetPolinomDiffValue(double diameter, double polinomCoefficientI3, SpeedCalculationParameters parameters,
         double polinomCoefficientI2)
     {
         double diffPolinomPressure = 3 * polinomCoefficientI2 * Math.Pow(diameter, 2) + polinomCoefficientI3 * 6 *
@@ -84,7 +84,7 @@ public static class CalculationDiameterHelper
         return calculationError;
     }
 
-    private static double GetPolinomCoefficientI2(List<AerodynamicsData> datas, CalculationParameters parameters)
+    private static double GetPolinomCoefficientI2(List<AerodynamicsData> datas, SpeedCalculationParameters parameters)
     {
         var aerodynamicRow = AerodinamicRowHelper.GetAerodinamicRow(datas, parameters);
         var flowRateRequired = parameters.FlowRateRequired;
@@ -100,7 +100,7 @@ public static class CalculationDiameterHelper
         return polinomCoefficientI2;
     }
 
-    private static double GetPolinomCoefficientI1(List<AerodynamicsData> datas, CalculationParameters parameters)
+    private static double GetPolinomCoefficientI1(List<AerodynamicsData> datas, SpeedCalculationParameters parameters)
     {
         var aerodynamicRow = AerodinamicRowHelper.GetAerodinamicRow(datas, parameters);
         var flowRateRequired = parameters.FlowRateRequired;
@@ -116,7 +116,7 @@ public static class CalculationDiameterHelper
         return polinomCoefficientI1;
     }
 
-    private static double GetPolinomCoefficientI3(List<AerodynamicsData> datas, CalculationParameters parameters)
+    private static double GetPolinomCoefficientI3(List<AerodynamicsData> datas, SpeedCalculationParameters parameters)
     {
         var aerodynamicRow = AerodinamicRowHelper.GetAerodinamicRow(datas, parameters);
 

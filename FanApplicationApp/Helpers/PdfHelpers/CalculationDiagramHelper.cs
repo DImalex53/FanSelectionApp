@@ -10,7 +10,7 @@ public static class CalculationDiagramHelper
 {
     public static (double[] flowRates, double[] pressureResistances) GetPressureResistanceMassive(
         int pointsCount,
-        CalculationParameters parameters)
+        SpeedCalculationParameters parameters)
     {
         double flowRateMax = parameters.FlowRateRequired;
         double FlowRateMin = 0;
@@ -27,7 +27,7 @@ public static class CalculationDiagramHelper
     public static (double[] rpmValues, double[] nominalTorques) GetNominalTorqueMassive(
         int pointsCount,
         List<AerodynamicsData> datas,
-        CalculationParameters parameters)
+        SpeedCalculationParameters parameters)
     {
         double RpmValueMax = parameters.Rpm;
         double RpmValueMin = 0;
@@ -43,7 +43,7 @@ public static class CalculationDiagramHelper
     }
     public static (double[] rpmValues, double[] torqueWithGates) GetTorqueWithGateMassive(
         int pointsCount, List<AerodynamicsData> datas,
-        CalculationParameters parameters)
+        SpeedCalculationParameters parameters)
     {
         double RpmValueMax = parameters.Rpm;
         double RpmValueMin = 0;
@@ -58,7 +58,7 @@ public static class CalculationDiagramHelper
         return (rpmValues, torqueWithGates);
     }
     public static (double[] flowRates, double[] staticPressures) GetStaticPressureMassive(
-        int pointsCount, CalculationParameters parameters,
+        int pointsCount, SpeedCalculationParameters parameters,
         List<AerodynamicsData> datas)
     {
         var aerodynamicRow = AerodinamicRowHelper.GetAerodinamicRow(datas, parameters);
@@ -79,7 +79,7 @@ public static class CalculationDiagramHelper
         return (flowRates, staticPressures);
     }
     public static (double[] flowRates, double[] totalPressures) GetTotalPressureMassive(
-        int pointsCount, CalculationParameters parameters,
+        int pointsCount, SpeedCalculationParameters parameters,
         List<AerodynamicsData> datas)
     {
         var aerodynamicRow = AerodinamicRowHelper.GetAerodinamicRow(datas, parameters);
@@ -101,7 +101,7 @@ public static class CalculationDiagramHelper
     }
     public static (double[] flowRates, double[] powers) GetPowerMassive(
         int pointsCount,
-        CalculationParameters parameters,
+        SpeedCalculationParameters parameters,
         List<AerodynamicsData> datas)
     {
         var aerodynamicRow = AerodinamicRowHelper.GetAerodinamicRow(datas, parameters);
@@ -123,7 +123,7 @@ public static class CalculationDiagramHelper
 
         return (flowRates, powers);
     }
-    private static double GetDinamicPressure(double flowRate, CalculationParameters parameters, List<AerodynamicsData> datas)
+    private static double GetDinamicPressure(double flowRate, SpeedCalculationParameters parameters, List<AerodynamicsData> datas)
     {
         var aerodynamicRow = AerodinamicRowHelper.GetAerodinamicRow(datas, parameters);
         var diameter = CalculationDiameterHelper.GetDiameter(datas, parameters);
@@ -142,13 +142,13 @@ public static class CalculationDiagramHelper
 
         return dinamicPressure;
     }
-    private static double GetPolinomPressureResistance(double flowRate, CalculationParameters parameters)
+    private static double GetPolinomPressureResistance(double flowRate, SpeedCalculationParameters parameters)
     {
         double polinomPresureResistence = parameters.SystemResistance * Math.Pow(flowRate / parameters.FlowRateRequired, 2);
 
         return polinomPresureResistence;
     }
-    private static double GetPolinomStaticPressure(double flowRate, CalculationParameters parameters, List<AerodynamicsData> datas)
+    private static double GetPolinomStaticPressure(double flowRate, SpeedCalculationParameters parameters, List<AerodynamicsData> datas)
     {
         int Coefficient = 2;
         int SecondsInHour = 3600;
@@ -167,11 +167,11 @@ public static class CalculationDiagramHelper
 
         return polinomStaticPressure;
     }
-    public static double GetPolinomTotalPressure(double flowRate, List<AerodynamicsData> datas, CalculationParameters parameters)
+    public static double GetPolinomTotalPressure(double flowRate, List<AerodynamicsData> datas, SpeedCalculationParameters parameters)
     {
         return GetPolinomStaticPressure(flowRate, parameters, datas) + GetDinamicPressure(flowRate, parameters, datas);
     }
-    public static double GetPolinomPower(double flowRate, List<AerodynamicsData> datas, CalculationParameters parameters)
+    public static double GetPolinomPower(double flowRate, List<AerodynamicsData> datas, SpeedCalculationParameters parameters)
     {
         int Coefficient = 1000;
         int SecondsInHour = 3600;
@@ -179,7 +179,7 @@ public static class CalculationDiagramHelper
         return flowRate * GetPolinomTotalPressure(flowRate, datas, parameters) /
             GetPolinomEeficiency(flowRate, datas, parameters) / Coefficient / SecondsInHour;
     }
-    public static double GetPolinomEeficiency(double flowRate, List<AerodynamicsData> datas, CalculationParameters parameters)
+    public static double GetPolinomEeficiency(double flowRate, List<AerodynamicsData> datas, SpeedCalculationParameters parameters)
     {
         var aerodynamicRow = AerodinamicRowHelper.GetAerodinamicRow(datas, parameters);
         var diameter = CalculationDiameterHelper.GetDiameter(datas, parameters);
@@ -196,7 +196,7 @@ public static class CalculationDiagramHelper
         return polinomEfficiency;
     }
 
-    public static double GetPolinomStaticEficiency(double flowRate, List<AerodynamicsData> datas, CalculationParameters parameters)
+    public static double GetPolinomStaticEficiency(double flowRate, List<AerodynamicsData> datas, SpeedCalculationParameters parameters)
     {
         int SecondsInHour = 3600;
         int Coefficient = 1000;
@@ -206,7 +206,7 @@ public static class CalculationDiagramHelper
 
         return polinomStaticEficiency;
     }
-    private static double GetPeripheralSpeed(double diameter, CalculationParameters parameters)
+    private static double GetPeripheralSpeed(double diameter, SpeedCalculationParameters parameters)
     {
         int SecPerMinute = 60;
         var peripheralSpeed = double.Pi * diameter * parameters.Rpm / SecPerMinute;
@@ -218,7 +218,7 @@ public static class CalculationDiagramHelper
         int Coefficient = 4;
         return double.Pi * Math.Pow(diameter, 2) / Coefficient;
     }
-    private static double GetFlowRateMaxMin(double deltaEfficiency, double diameter, CalculationParameters parameters)
+    private static double GetFlowRateMaxMin(double deltaEfficiency, double diameter, SpeedCalculationParameters parameters)
     {
         double peripheralSpeed = GetPeripheralSpeed(diameter, parameters);
         double areaImpeller = GetAreaImpeller(diameter);
@@ -232,7 +232,7 @@ public static class CalculationDiagramHelper
 
         return deltaEfficiency * SecondsInHour * peripheralSpeed * areaImpeller * Coefficient;
     }
-    private static double GetPolinomNominalTorque(double rpmValue, List<AerodynamicsData> datas, CalculationParameters parameters)
+    private static double GetPolinomNominalTorque(double rpmValue, List<AerodynamicsData> datas, SpeedCalculationParameters parameters)
     {
         int SecPerMinute = 60;
 

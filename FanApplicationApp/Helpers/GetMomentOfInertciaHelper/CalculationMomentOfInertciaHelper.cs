@@ -6,7 +6,7 @@ public static class CalculationMomentOfInertciaHelper
 {
     private readonly static double Stock = 1.1;
     private readonly static double StockOfHub = 1.1;
-    public static double GetMomentOfInertcia(List<AerodynamicsData> datas, CalculationParameters parameters)
+    public static double GetMomentOfInertcia(List<AerodynamicsData> datas, SpeedCalculationParameters parameters)
     {
         var aerodynamicRow = AerodinamicRowHelper.GetAerodinamicRow(datas, parameters);
         var diameter = CalculationDiameterHelper.GetDiameter(datas, parameters);
@@ -39,7 +39,7 @@ public static class CalculationMomentOfInertciaHelper
     }
     public static double GetWeightOfImpeller(double bladeLength, double bladeWidth, double diameter,
         double bladeThickness, int numberOfBlades, double mainDiskThickness, double impellerWidth,
-        double coverDiskThickness, double impellerInletDiameter, CalculationParameters parameters)
+        double coverDiskThickness, double impellerInletDiameter, SpeedCalculationParameters parameters)
     {
         double weightOfImpeller = (GetWeightOfBlade(bladeLength, bladeWidth, diameter,
         bladeThickness, parameters) * numberOfBlades + GetWeightOfMainDisk(diameter,
@@ -54,14 +54,14 @@ public static class CalculationMomentOfInertciaHelper
         return weightOfImpeller;
     }
     private static double GetWeightOfBlade(double bladeLength, double bladeWidth, double diameter,
-        double bladeThickness, CalculationParameters parameters)
+        double bladeThickness, SpeedCalculationParameters parameters)
     {
         double weightOfBlade = parameters.MaterialDensyti * bladeLength * bladeWidth * Math.Pow(diameter, 2) * bladeThickness;
 
         return weightOfBlade;
     }
     private static double GetWeightOfMainDisk(double diameter,
-        double mainDiskThickness, CalculationParameters parameters)
+        double mainDiskThickness, SpeedCalculationParameters parameters)
     {
         int Coefficient = 4;
 
@@ -70,7 +70,7 @@ public static class CalculationMomentOfInertciaHelper
         return weightOfMainDisk;
     }
     private static double GetWeightOfCoverDisk(double diameter, double impellerWidth,
-        double coverDiskThickness, double impellerInletDiameter, CalculationParameters parameters)
+        double coverDiskThickness, double impellerInletDiameter, SpeedCalculationParameters parameters)
     {
         int Coefficient = 2;
         double coverDiskGeneratrix = GetCoverDiskGeneratrix(impellerWidth, diameter, impellerInletDiameter);
@@ -92,7 +92,7 @@ public static class CalculationMomentOfInertciaHelper
         out double bladeThickness,
         out double mainDiskThickness,
         out double coverDiskThickness,
-        CalculationParameters parameters)
+        SpeedCalculationParameters parameters)
     {
         bladeThickness = 0;
         mainDiskThickness = 0;

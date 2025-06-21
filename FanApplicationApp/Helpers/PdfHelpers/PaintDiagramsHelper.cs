@@ -8,13 +8,13 @@ public class PaintDiagramsHelper
     private static readonly int PngWidth = 800;
     private static readonly int PngHeight = 600;
 
-    public static byte[]? GenerateAerodynamicPng(List<AerodynamicsData> datas, CalculationParameters parameters)
+    public static byte[]? GenerateAerodynamicPng(List<AerodynamicsData> datas, SpeedCalculationParameters parameters)
     {
         var plot = GenerateAerodynamicPlot(datas, parameters);
         return plot.GetImageBytes(PngWidth, PngHeight);
     }
 
-    public static Plot? GenerateAerodynamicPlot(List<AerodynamicsData> datas, CalculationParameters parameters)
+    public static Plot? GenerateAerodynamicPlot(List<AerodynamicsData> datas, SpeedCalculationParameters parameters)
     {
         int pointsCount = 100;
 
@@ -92,7 +92,7 @@ public class PaintDiagramsHelper
         return aerodynamicPlot;
     }
 
-    public static Plot? GenerateTorquePlot(List<AerodynamicsData> datas, CalculationParameters parameters)
+    public static Plot? GenerateTorquePlot(List<AerodynamicsData> datas, SpeedCalculationParameters parameters)
     {
         int pointsCount = 100;
 

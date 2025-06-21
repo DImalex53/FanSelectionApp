@@ -4,7 +4,7 @@ namespace SpeedCalc.Helpers.GetDiameterHelpers
 {
     public class AerodinamicRowHelper
     {
-        public static AerodynamicsData? GetAerodinamicRow(List<AerodynamicsData> datas, CalculationParameters parameters)
+        public static AerodynamicsData? GetAerodinamicRow(List<AerodynamicsData> datas, SpeedCalculationParameters parameters)
         {
             double speed = CalculationDiameterHelper.GetSpeed(parameters);
             var aerodynamicsByType = datas.Where(d => d.Type == (AerodynamicsType)parameters.Type);

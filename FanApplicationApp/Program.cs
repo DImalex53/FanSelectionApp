@@ -14,12 +14,24 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IAerodynamicsDataRepository, AerodynamicsDataRepository>();
 builder.Services.AddScoped<IAerodynamicService, AerodynamicService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
+app.UseCors("AllowAll");
+
 
 app.MapControllerRoute(
     name: "default",

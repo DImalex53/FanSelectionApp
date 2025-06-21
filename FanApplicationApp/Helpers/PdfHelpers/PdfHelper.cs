@@ -133,7 +133,7 @@ public static class PdfExporter
         List<AerodynamicsData> datas,
         Plot aerodynamicPlot,
         Plot torquePlot,
-        CalculationParameters parameters,
+        SpeedCalculationParameters parameters,
         PdfExportOptions? options = null)
     {
         options ??= new PdfExportOptions();
@@ -271,7 +271,7 @@ public static class PdfExporter
 
                 gfx.DrawImage(image, (pageWidth - imageWidth) / 2, imageY, imageWidth, imageHeight);
 
-                string vibroisolyators = parameters.Vibroisolation == 1 ? "предусмотрены" : "не предусмотрены";
+                string vibroisolyators = parameters.Vibroisolation ? "предусмотрены" : "не предусмотрены";
 
                 string materialDesign = parameters.MaterialDesign switch
                 {
@@ -330,7 +330,7 @@ public static class PdfExporter
                 leftColumnParams.Add($"Мощность: {powerWorkPoint:F1} кВт");
                 leftColumnParams.Add($"Угол разворота: {parameters.ExhaustDirection?.ToString() ?? ""}");
 
-                rightColumnParams.Add($"Направление вращения: {parameters.RotaitionDirection ?? ""}");
+                rightColumnParams.Add($"Направление вращения: {(parameters.RotaitionDirection == 0 ? "Правое" : "Левое")}");
                 rightColumnParams.Add($"По ГОСТ Р 55852-2013");
                 rightColumnParams.Add($"Исполнение: {materialDesign}");
                 rightColumnParams.Add($"Тип лопаток рабочего колеса:");
@@ -379,11 +379,11 @@ public static class PdfExporter
                 double paramsYPos = 140;
                 var motorVoltage = parameters.MotorVoltage;
                 var rpm = parameters.Rpm;
-                var klimatic = parameters.KLimatic;
+                var klimatic = parameters.Klimatic;
                 var markOfVzrivMotor = parameters.MarkOfVzrivMotor;
                 var VFD = "не предусмотрен";
                 var dopTrebovanyaMotor = parameters.DopTrebovaniyaMotor;
-                if (parameters.NalichieVFD == 1) { VFD = "предусмотрен"; }
+                if (parameters.NalichieVFD) { VFD = "предусмотрен"; }
 
                 var momentOfInertcia = CalculationMomentOfInertciaHelper.GetMomentOfInertcia(datas, parameters);
                 var shaftPower = CalculationDiagramHelper.GetPolinomPower(parameters.FlowRateRequired, datas, parameters);
@@ -439,42 +439,14 @@ public static class PdfExporter
                 var paramFont = new XFont(options.FontFamily, 11);
                 double paramsYPos = 140;
 
-                string muftType = "не предусмотрена";
-                switch (parameters.MuftType)
-                {
-                    case 1: muftType = "не предусмотрена"; break;
-                    case 2: muftType = "МУВП"; break;
-                    case 3: muftType = "Лепестковая"; break;
-                    case 4: muftType = "Пластинчатая"; break;
-                }
+                var muftType = parameters.MuftType;
+                var typePPO = parameters.TypeOfPPO;
+                var shaftSeal = parameters.ShaftSeal;
 
-                string typePPO = "не предусмотрена";
-                switch (parameters.TypeOfPPO)
-                {
-                    case 1: typePPO = "не предусмотрена"; break;
-                    case 2: typePPO = "Стандарт - сварная/масляная ванна/жидкое масло"; break;
-                    case 3: typePPO = "Литая/масляная ванна/жидкое масло"; break;
-                    case 4: typePPO = "типа SKF/разнесенные подшипниковые узлы на консистентной смазке"; break;
-                    case 5: typePPO = "типа SKF/разнесенные подшипниковые узлы на жидком масле"; break;
-                    case 6: typePPO = "на подшипниках скольжения с принудительной подачей масла через маслостанцию"; break;
-                }
-
-                string shaftSeal = "не предусмотрено";
-                switch (parameters.ShaftSeal)
-                {
-                    case 1: shaftSeal = "не предусмотрено"; break;
-                    case 2: shaftSeal = "Войлочное"; break;
-                    case 3: shaftSeal = "Силиконовое"; break;
-                    case 4: shaftSeal = "Сальнико-набивочное"; break;
-                    case 5: shaftSeal = "Газоплотное манжетное"; break;
-                    case 6: shaftSeal = "Графитное"; break;
-                    case 7: shaftSeal = "Торцевое картриджное"; break;
-                }
-
-                var flangeInlet = parameters.FlangeInlet == 1 ? "предусмотрен" : "не предусмотрен";
-                var flangeOutlet = parameters.FlangeOutlet == 1 ? "предусмотрен" : "не предусмотрен";
-                var guideVane = parameters.GuideVane == 1 ? "предусмотрен" : "не предусмотрен";
-                var teploisolation = parameters.Teploisolation == 1 ? "предусмотрен" : "не предусмотрен";
+                var flangeInlet = parameters.FlangeInlet ? "предусмотрен" : "не предусмотрен";
+                var flangeOutlet = parameters.FlangeOutlet ? "предусмотрен" : "не предусмотрен";
+                var guideVane = parameters.GuideVane ? "предусмотрен" : "не предусмотрен";
+                var teploisolation = parameters.Teploisolation ? "предусмотрен" : "не предусмотрен";
 
                 var completenessParameters = new List<string>
             {
@@ -673,9 +645,9 @@ public static class PdfExporter
                     new XRect(0, middleY + 40, pageWidth, 30),
                     XStringFormats.TopCenter);
 
-                var shefMontage = parameters.ShefMontage == 1 ? "предусмотрен" : "не предусмотрен";
-                var puskoNaladka = parameters.PuskoNaladka == 1 ? "предусмотрены" : "не предусмотрены";
-                var studyOfPersonal = parameters.StudyOfPersonal == 1 ? "предусмотрено" : "не предусмотрено";
+                var shefMontage = parameters.ShefMontage ? "предусмотрен" : "не предусмотрен";
+                var puskoNaladka = parameters.PuskoNaladka ? "предусмотрены" : "не предусмотрены";
+                var studyOfPersonal = parameters.StudyOfPersonal ? "предусмотрено" : "не предусмотрено";
 
                 string[] services = new string[]
                 {

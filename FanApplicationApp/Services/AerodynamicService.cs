@@ -9,7 +9,7 @@ public class AerodynamicService(IAerodynamicsDataRepository aerodynamicsDataRepo
     private readonly IAerodynamicsDataRepository _aerodynamicsDataRepository = aerodynamicsDataRepository;
 
 
-    public async Task<byte[]> GenerateFileAsync(CalculationParameters parameters)
+    public async Task<byte[]> GenerateFileAsync(SpeedCalculationParameters parameters)
     {
         var allData = (await _aerodynamicsDataRepository.GetAllAsync()).ToList();
 
@@ -37,7 +37,7 @@ public class AerodynamicService(IAerodynamicsDataRepository aerodynamicsDataRepo
         return document;
     }
 
-    public async Task<byte[]> GeneratePngAsync(CalculationParameters parameters)
+    public async Task<byte[]> GeneratePngAsync(SpeedCalculationParameters parameters)
     {
         var allData = (await _aerodynamicsDataRepository.GetAllAsync()).ToList();
         var png = PaintDiagramsHelper.GenerateAerodynamicPng(allData, parameters);

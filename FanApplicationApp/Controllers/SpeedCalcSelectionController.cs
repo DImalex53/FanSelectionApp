@@ -11,7 +11,7 @@ public class SpeedCalcSelectionController(IAerodynamicService calculationService
     private readonly IAerodynamicService _service = calculationService;
 
     [HttpPost("downloadfile")]
-    public async Task<IActionResult> DownloadFile([FromBody] CalculationParameters parameters)
+    public async Task<IActionResult> DownloadFile([FromBody] SpeedCalculationParameters parameters)
     {
         if (parameters == null)
             return BadRequest("Параметры не могут быть пустыми");
@@ -25,7 +25,7 @@ public class SpeedCalcSelectionController(IAerodynamicService calculationService
     }
 
     [HttpPost("downloadpng")]
-    public async Task<IActionResult> DownloadPng([FromBody] CalculationParameters parameters)
+    public async Task<IActionResult> DownloadPng([FromBody] SpeedCalculationParameters parameters)
     {
         if (parameters == null)
             return BadRequest("Параметры не могут быть пустыми");
