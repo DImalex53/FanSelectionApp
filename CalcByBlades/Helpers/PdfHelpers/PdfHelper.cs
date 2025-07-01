@@ -6,6 +6,7 @@ using System.Diagnostics;
 using BladesCalc.Models;
 using ScottPlot;
 using BladesCalc.Helpers.GetMomentOfInertciaHelper;
+using BladesCalc.Helpers.AerodynamicHelpers;
 
 namespace BladesCalc.Helpers.PdfHelpers;
 
@@ -120,7 +121,9 @@ public static class PdfExporter
         Plot aerodynamicPlot,
         Plot torquePlot,
         string pdfPath,
-        CalculationParameters parameters,
+        List<AerodynamicsDataBlades> datas,
+        BladesCalculationParameters parameters,
+        ParametersDrawImage parametersDrawImage,
         double staticPressure1,
         double staticPressure2,
         double staticPressure3,
@@ -151,7 +154,7 @@ public static class PdfExporter
         
         if (parameters.SuctionType == 1)
         { numberOfBlades = numberOfBlades * 2; }
-
+        DatasRightSchemes rowOfRightSchemes = AerodinamicHelper.GetRowOfRightSchemes(datas, parameters, parametersDrawImage);
         try
         {
             // Сохраняем графики с явным указанием формата
@@ -297,7 +300,7 @@ public static class PdfExporter
 
                 // Параметры под графиком
 
-                string vibroisolyators = parameters.Vibroisolation == 1 ? "предусмотрены" : "не предусмотрены";
+                string vibroisolyators = parameters.Vibroisolation == true ? "предусмотрены" : "не предусмотрены";
 
                 string materialDesign = parameters.MaterialDesign switch
                 {
@@ -332,7 +335,7 @@ public static class PdfExporter
                 }
 
                 gfx.DrawString(
-                $"ТДМ {markImpeller}-{diameter * 10:F1}{typeIsp} {parameters.Density} кг/м3 {parameters.Rpm} об/мин",
+                $"ТДМ {markImpeller}-{diameter * 10:F1}{typeIsp} {parameters.Density} кг/м3 {rowOfRightSchemes.Rpm} об/мин",
                 paramFont,
                 XBrushes.Black,
                 new XRect(column1X, nameY, pageWidth, 30),
@@ -343,9 +346,9 @@ public static class PdfExporter
                 var rightColumnParams = new List<string>();
 
                 // Заполняем столбцы (примерное разделение)
-                
+
                 leftColumnParams.Add($"Угол разворота: {parameters.ExhaustDirection?.ToString() ?? ""}");
-                leftColumnParams.Add($"Направление вращения: {parameters.RotaitionDirection ?? ""}");
+                leftColumnParams.Add($"Направление вращения: {parameters.RotaitionDirection}");
                 leftColumnParams.Add($"По ГОСТ Р 55852-2013");
                 leftColumnParams.Add($"Исполнение: {materialDesign}");
                 leftColumnParams.Add($"Тип лопаток рабочего колеса:");
@@ -401,8 +404,8 @@ public static class PdfExporter
                 double paramsYPos = 140;
 
                 var motorVoltage = parameters.MotorVoltage;
-                var rpm = parameters.Rpm;
-                var klimatic = parameters.KLimatic;
+                var rpm = rowOfRightSchemes.Rpm;
+                var klimatic = parameters.Klimatic;
                 var markOfVzrivMotor = parameters.MarkOfVzrivMotor;
                 var VFD = "не предусмотрен";
                 var dopTrebovanyaMotor = parameters.DopTrebovaniyaMotor;
@@ -412,7 +415,9 @@ public static class PdfExporter
                 }
 
                 var momentOfInertcia = CalculationMomentOfInertciaHelper.GetMomentOfInertcia(
+                    datas,
                     parameters,
+                    parametersDrawImage,
                     impellerWidth,
                     bladeWidth,
                     bladeLength,
@@ -504,42 +509,16 @@ public static class PdfExporter
                 var paramFont = new XFont(options.FontFamily, 11);
                 double paramsYPos = 140;
 
-                string muftType = "не предусмотрена";
-                switch (parameters.MuftType)
-                {
-                    case 1: muftType = "не предусмотрена"; break;
-                    case 2: muftType = "МУВП"; break;
-                    case 3: muftType = "Лепестковая"; break;
-                    case 4: muftType = "Пластинчатая"; break;
-                }
+                string? muftType = parameters.MuftType;
+                
+                string? typePPO = parameters.TypeOfPPO;
+                
+                string? shaftSeal = parameters.ShaftSeal;
 
-                string typePPO = "не предусмотрена";
-                switch (parameters.TypeOfPPO)
-                {
-                    case 1: typePPO = "не предусмотрена"; break;
-                    case 2: typePPO = "Стандарт - сварная/масляная ванна/жидкое масло"; break;
-                    case 3: typePPO = "Литая/масляная ванна/жидкое масло"; break;
-                    case 4: typePPO = "типа SKF/разнесенные подшипниковые узлы на консистентной смазке"; break;
-                    case 5: typePPO = "типа SKF/разнесенные подшипниковые узлы на жидком масле"; break;
-                    case 6: typePPO = "на подшипниках скольжения с принудительной подачей масла через маслостанцию"; break;
-                }
-
-                string shaftSeal = "не предусмотрено";
-                switch (parameters.ShaftSeal)
-                {
-                    case 1: shaftSeal = "не предусмотрено"; break;
-                    case 2: shaftSeal = "Войлочное"; break;
-                    case 3: shaftSeal = "Силиконовое"; break;
-                    case 4: shaftSeal = "Сальнико-набивочное"; break;
-                    case 5: shaftSeal = "Газоплотное манжетное"; break;
-                    case 6: shaftSeal = "Графитное"; break;
-                    case 7: shaftSeal = "Торцевое картриджное"; break;
-                }
-
-                var flangeInlet = parameters.FlangeInlet == 1 ? "предусмотрен" : "не предусмотрен";
-                var flangeOutlet = parameters.FlangeOutlet == 1 ? "предусмотрен" : "не предусмотрен";
-                var guideVane = parameters.GuideVane == 1 ? "предусмотрен" : "не предусмотрен";
-                var teploisolation = parameters.Teploisolation == 1 ? "предусмотрен" : "не предусмотрен";
+                var flangeInlet = parameters.FlangeInlet == true ? "предусмотрен" : "не предусмотрен";
+                var flangeOutlet = parameters.FlangeOutlet == true ? "предусмотрен" : "не предусмотрен";
+                var guideVane = parameters.GuideVane == true ? "предусмотрен" : "не предусмотрен";
+                var teploisolation = parameters.Teploisolation == true ? "предусмотрен" : "не предусмотрен";
 
                 var completenessParameters = new List<string>
                 {
@@ -761,9 +740,9 @@ public static class PdfExporter
                     XStringFormats.TopCenter);
 
                 // Статусы услуг
-                var shefMontage = parameters.ShefMontage == 1 ? "предусмотрен" : "не предусмотрен";
-                var puskoNaladka = parameters.PuskoNaladka == 1 ? "предусмотрены" : "не предусмотрены";
-                var studyOfPersonal = parameters.StudyOfPersonal == 1 ? "предусмотрено" : "не предусмотрено";
+                var shefMontage = parameters.ShefMontage == true ? "предусмотрен" : "не предусмотрен";
+                var puskoNaladka = parameters.PuskoNaladka == true ? "предусмотрены" : "не предусмотрены";
+                var studyOfPersonal = parameters.StudyOfPersonal == true ? "предусмотрено" : "не предусмотрено";
 
                 string[] services = new string[]
                 {

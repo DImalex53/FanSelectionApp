@@ -7,7 +7,7 @@ public static class PaintDiagramsHelper
     private const int MaxRPM = 3000;
     private const double MinDiameter = 0.4;
     private const double MaxDiameter = 3;
-    public static List<DatasRightSchemes> GenerateTableOfRightSchemes(List<AerodynamicsDataBlades> datas, CalculationParameters parameters, ParametersDrawImage parametersDrawImage)
+    public static List<DatasRightSchemes> GenerateTableOfRightSchemes(List<AerodynamicsDataBlades> datas, BladesCalculationParameters parameters, ParametersDrawImage parametersDrawImage)
     {
         var tableOfRightSchemes = new List<DatasRightSchemes>();
         var aerodynamicsByTypeBlades = AerodinamicHelper.GetAerodynamicByTypeBlades(datas, parameters);
@@ -93,13 +93,13 @@ public static class PaintDiagramsHelper
                     {
                         conditionMet = parameters.FlowRateRequired > flowRateMin &&
                                       parameters.FlowRateRequired < flowRateMax &&
-                                      parameters.PresureRequired < totalPressure;
+                                      parameters.SystemResistance < totalPressure;
                     }
                     if (parameters.TypeOfPressure == 1)
                     {
                         conditionMet = parameters.FlowRateRequired > flowRateMin &&
                                       parameters.FlowRateRequired < flowRateMax &&
-                                      parameters.PresureRequired < staticPressure;
+                                      parameters.SystemResistance < staticPressure;
                     }
 
                     if (conditionMet)

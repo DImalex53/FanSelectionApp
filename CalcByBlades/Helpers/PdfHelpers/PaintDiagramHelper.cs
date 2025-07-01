@@ -8,7 +8,7 @@ public static class PaintDiagramHelper
 {
     private const int pointsCount = 100;
     public static Plot? GetDiagrameDraw(
-        CalculationParameters parameters,
+        BladesCalculationParameters parameters,
         double staticPressure1,
         double staticPressure2,
         double staticPressure3,
@@ -272,7 +272,7 @@ public static class PaintDiagramHelper
         return aerodynamicPlot;
     }
     public static byte[] GetDiagramAsImageBytes(
-    CalculationParameters parameters,
+    BladesCalculationParameters parameters,
     double staticPressure1,
     double staticPressure2,
     double staticPressure3,
@@ -325,7 +325,7 @@ public static class PaintDiagramHelper
         return plot.GetImageBytes(width, height, format);
     }
     public static Plot? GenerateTorquePlot(
-        CalculationParameters parameters,
+        BladesCalculationParameters parameters,
         double staticPressure1,
         double staticPressure2,
         double staticPressure3,
@@ -419,7 +419,7 @@ public static class PaintDiagramHelper
         annotation.LabelBorderWidth = 1;
     }
     public static (double flowRate, double pressure) FindIntersectionPresurePoint(
-            CalculationParameters parameters,
+            BladesCalculationParameters parameters,
             double staticPressure1,
             double staticPressure2,
             double staticPressure3,

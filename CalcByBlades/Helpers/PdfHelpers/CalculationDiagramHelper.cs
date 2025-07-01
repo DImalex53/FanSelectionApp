@@ -9,7 +9,7 @@ public static class CalculationDiagramHelper
     public static (double[] flowRates, double[] pressureResistances) GetPressureResistanceMassive(
         int pointsCount,
         double flowRateWorkPoint,
-        CalculationParameters parameters)
+        BladesCalculationParameters parameters)
     {
         double flowRateMax = flowRateWorkPoint;
         double FlowRateMin = 0;
@@ -26,7 +26,7 @@ public static class CalculationDiagramHelper
     public static (double[] rpmValues, double[] nominalTorques) GetNominalTorqueMassive(
         int pointsCount,
         double flowRateWorkPoint,
-        CalculationParameters parameters,
+        BladesCalculationParameters parameters,
         int rpm,
         double staticPressure1,
         double staticPressure2,
@@ -69,7 +69,7 @@ public static class CalculationDiagramHelper
     public static (double[] rpmValues, double[] torqueWithGates) GetTorqueWithGateMassive(
         int pointsCount, 
         double flowRateWorkPoint,
-        CalculationParameters parameters,
+        BladesCalculationParameters parameters,
         int rpm,
         double staticPressure1,
         double staticPressure2,
@@ -112,7 +112,7 @@ public static class CalculationDiagramHelper
     }
     public static (double[] flowRates, double[] staticPressures) GetStaticPressureMassive(
         int pointsCount,
-        CalculationParameters parameters,
+        BladesCalculationParameters parameters,
         int rpm,
         double staticPressure1,
         double staticPressure2,
@@ -144,7 +144,7 @@ public static class CalculationDiagramHelper
     }
     public static (double[] flowRates, double[] totalPressures) GetTotalPressureMassive(
         int pointsCount,
-        CalculationParameters parameters,
+        BladesCalculationParameters parameters,
         int rpm,
         double staticPressure1,
         double staticPressure2,
@@ -178,7 +178,7 @@ public static class CalculationDiagramHelper
     }
     public static (double[] flowRates, double[] powers) GetPowerMassive(
         int pointsCount,
-        CalculationParameters parameters,
+        BladesCalculationParameters parameters,
         int rpm,
         double staticPressure1,
         double staticPressure2,
@@ -221,8 +221,8 @@ public static class CalculationDiagramHelper
         return (flowRates, powers);
     }
     private static double GetDinamicPressure(
-        double flowRate, 
-        CalculationParameters parameters,  
+        double flowRate,
+        BladesCalculationParameters parameters,  
         double outletLength,
         double outletWidth,
         double diameter
@@ -236,15 +236,15 @@ public static class CalculationDiagramHelper
         return parameters.Density * Math.Pow(flowRate / (SecondsInHour * outletLength * outletWidth
              * Math.Pow(diameter, 2)), 2) / Coefficient;
     }
-    private static double GetPolinomPressureResistance(double flowRate, CalculationParameters parameters)
+    private static double GetPolinomPressureResistance(double flowRate, BladesCalculationParameters parameters)
     {
         double polinomPresureResistence = parameters.SystemResistance * Math.Pow(flowRate / parameters.FlowRateRequired, 2);
 
         return polinomPresureResistence;
     }
     public static double GetPolinomStaticPressure(
-        double flowRate, 
-        CalculationParameters parameters, 
+        double flowRate,
+        BladesCalculationParameters parameters, 
         int rpm, 
         double staticPressure1, 
         double staticPressure2, 
@@ -267,7 +267,7 @@ public static class CalculationDiagramHelper
     }
     public static double GetPolinomTotalPressure(
         double flowRate,
-        CalculationParameters parameters,
+        BladesCalculationParameters parameters,
         int rpm,
         double staticPressure1,
         double staticPressure2,
@@ -280,8 +280,8 @@ public static class CalculationDiagramHelper
             GetDinamicPressure(flowRate, parameters, outletLength, outletWidth, diameter);
     }
     public static double GetPolinomPower(
-        double flowRate, 
-        CalculationParameters parameters, 
+        double flowRate,
+        BladesCalculationParameters parameters, 
         int rpm,
         double staticPressure1,
         double staticPressure2,
@@ -302,7 +302,7 @@ public static class CalculationDiagramHelper
     }
     public static double GetPolinomTotalEeficiency(
         double flowRate,
-        CalculationParameters parameters,
+        BladesCalculationParameters parameters,
         int rpm,
         double efficiency1,
         double efficiency2,
@@ -322,7 +322,7 @@ public static class CalculationDiagramHelper
 
     public static double GetPolinomStaticEficiency(
         double flowRate,
-        CalculationParameters parameters,
+        BladesCalculationParameters parameters,
         int rpm,
         double staticPressure1,
         double staticPressure2,
@@ -358,8 +358,8 @@ public static class CalculationDiagramHelper
     public static double GetFlowRateMaxMin(
         double deltaEfficiency, 
         double diameter, 
-        int rpm, 
-        CalculationParameters parameters)
+        int rpm,
+        BladesCalculationParameters parameters)
     {
         double peripheralSpeed = GetPeripheralSpeed(diameter, rpm);
         double areaImpeller = GetAreaImpeller(diameter);
@@ -371,7 +371,7 @@ public static class CalculationDiagramHelper
     private static double GetPolinomNominalTorque(
         double rpmValue,
         double flowRateWorkPoint,
-        CalculationParameters parameters,
+        BladesCalculationParameters parameters,
         int rpm,
         double staticPressure1,
         double staticPressure2,
