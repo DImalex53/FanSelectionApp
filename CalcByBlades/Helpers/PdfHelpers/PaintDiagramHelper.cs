@@ -1,6 +1,4 @@
-﻿using BladesCalc.Helpers.AerodynamicHelpers;
-using ScottPlot;
-using System.IO;
+﻿using ScottPlot;
 using BladesCalc.Models;
 
 namespace BladesCalc.Helpers.PdfHelpers;
@@ -164,15 +162,15 @@ public static class PaintDiagramHelper
         { 
             var staticPressureWorkPoint = FindIntersectionPresurePoint(
                 parameters,
-            staticPressure1,
-            staticPressure2,
-            staticPressure3,
-            outletLength,
-            outletWidth,
-            minDeltaEfficiency,
-            maxDeltaEfficiency,
-            diameter,
-            rpm);
+                staticPressure1,
+                staticPressure2,
+                staticPressure3,
+                outletLength,
+                outletWidth,
+                minDeltaEfficiency,
+                maxDeltaEfficiency,
+                diameter,
+                rpm);
           (flowRates1, pressureResistances) = CalculationDiagramHelper.GetPressureResistanceMassive(
               pointsCount, 
               staticPressureWorkPoint.flowRate, 

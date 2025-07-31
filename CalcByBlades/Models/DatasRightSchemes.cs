@@ -1,11 +1,10 @@
-﻿namespace BladesCalc.Models
+﻿namespace BladesCalc.Models;
+
+public class DatasRightSchemes
 {
-    public class DatasRightSchemes
-    {
-        public int NomberOfScheme;
-        public double Diameter;
-        public int Rpm;
-        public string Scheme;
-        public byte[] DiagramAsImageBytes;
-    }
+    public int NomberOfScheme { get; set; }
+    public double Diameter { get; set; }
+    public int Rpm { get; set; }
+    public string Scheme { get; set; }
+    public byte[] DiagramAsImageBytes { get; set; }
 }

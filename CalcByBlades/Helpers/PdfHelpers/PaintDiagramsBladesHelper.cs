@@ -23,6 +23,7 @@ public static class PaintDiagramsHelper
         int rpm;
         int nomberOfScheme = 0;
         int maxHalfPoluces = 6;
+
         if (parameters.NalichieVFD == 1) { maxHalfPoluces = 61;}
 
         for (int nomberOfRow = 0; nomberOfRow < aerodynamicsByTypeBlades.Count; nomberOfRow++)
@@ -46,7 +47,10 @@ public static class PaintDiagramsHelper
 
             var nameOfFan = aerodynamicRowBlades.NewMarkOfFan;
 
-            if (parameters.SuctionType == 1) {nameOfFan = aerodynamicRowBlades.NewMarkOfFand;}
+            if (parameters.SuctionType == 1) 
+            {
+                nameOfFan = aerodynamicRowBlades.NewMarkOfFand;
+            }
 
             for (int k = 0; diameter < MaxDiameter; k++)
             {
@@ -60,12 +64,14 @@ public static class PaintDiagramsHelper
                         rpm, 
                         parameters
                         );
+
                     var flowRateMin = CalculationDiagramHelper.GetFlowRateMaxMin(
                         aerodynamicsByTypeBlades[nomberOfRow].MinDeltaEfficiency, 
                         diameter, 
                         rpm, 
                         parameters
                         );
+
                     var totalPressure = CalculationDiagramHelper.GetPolinomTotalPressure(
                         parameters.FlowRateRequired,
                         parameters,
@@ -77,6 +83,7 @@ public static class PaintDiagramsHelper
                         outletWidth,
                         diameter
                         );
+
                     var staticPressure = CalculationDiagramHelper.GetPolinomStaticPressure(
                         parameters.FlowRateRequired, 
                         parameters, 
@@ -106,26 +113,26 @@ public static class PaintDiagramsHelper
                     {
                         nomberOfScheme++;
                         var aerodynamicPlotBytes = PaintDiagramHelper.GetDiagramAsImageBytes(
-                            parameters,
-                            staticPressure1,
-                            staticPressure2,
-                            staticPressure3,
-                            minDeltaEfficiency,
-                            maxDeltaEfficiency,
-                            outletLength,
-                            outletWidth,
-                            efficiency1,
-                            efficiency2,
-                            efficiency3,
-                            efficiency4,
-                            newMarkOfFan,
-                            newMarkOfFand,
-                            diameter,
-                            rpm,
-                            width,
-                            height,
-                            imageFormat
-                            );
+                                parameters,
+                                staticPressure1,
+                                staticPressure2,
+                                staticPressure3,
+                                minDeltaEfficiency,
+                                maxDeltaEfficiency,
+                                outletLength,
+                                outletWidth,
+                                efficiency1,
+                                efficiency2,
+                                efficiency3,
+                                efficiency4,
+                                newMarkOfFan,
+                                newMarkOfFand,
+                                diameter,
+                                rpm,
+                                width,
+                                height,
+                                imageFormat
+                                );
                         tableOfRightSchemes.Add(new DatasRightSchemes
                         {
                             NomberOfScheme = nomberOfScheme,
