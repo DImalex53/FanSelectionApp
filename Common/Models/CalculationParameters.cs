@@ -21,7 +21,7 @@ public class CalculationParameters
     public double Density { get; set; } = 1.204;
 
     /// <summary>
-    /// Тип подбора
+    /// Тип перемещаемой среды
     /// (основной)
     /// </summary>
     public int Type { get; set; } = 2;

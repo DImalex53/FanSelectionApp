@@ -22,6 +22,6 @@ public static class AerodinamicHelper
     }
     public static AerodynamicsDataBlades GetAerodynamicByTypeBladesRow (List<AerodynamicsDataBlades> datas, BladesCalculationParameters parameters)
     {
-        return GetAerodynamicByTypeBlades(datas, parameters).FirstOrDefault(d => d.Scheme == parameters.RightSchemeChoose);
+        return GetAerodynamicByTypeBlades(datas, parameters).FirstOrDefault();
     }
 }

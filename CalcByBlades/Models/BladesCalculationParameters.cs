@@ -5,7 +5,7 @@ namespace BladesCalc.Models;
 public class BladesCalculationParameters : CalculationParameters
 {
     /// <summary>
-    /// Тип лопаток (1 - Назад загнутые, 2 - радиально оканчивающиеся, 3 - аэрофольные, 4 - прямые, отклоененные назад, 5 - вперед загнутые)
+    /// Тип лопаток (1 - Назад загнутые, 2 - радиально оканчивающиеся, 3 - аэрофольные, 4 - прямые, отклоенные назад, 5 - вперед загнутые)
     /// </summary>
     public int TypeOfBladesKod { get; set; } = 1;
 
@@ -17,7 +17,7 @@ public class BladesCalculationParameters : CalculationParameters
     /// <summary>
     /// Выбор правильной схемы
     /// </summary>
-    public string RightSchemeChoose { get; set; }
-    public double NalichieVFD { get; set; } = 0;
+    public required string RightSchemeChoose { get; set; }
+    public new double NalichieVFD { get; set; } = 0;
     public int TypeOfChoose { get; set; } = 0;
 }

@@ -26,8 +26,8 @@ public class AerodynamicsDataBladesContext : DbContext
             // Настройка Id
             entity.Property(e => e.Id)
                 .HasColumnName("Id")
-                .HasColumnType("uniqueidentifier")
-                .HasDefaultValueSql("NEWID()")
+                .HasColumnType("uuid")
+                .HasDefaultValueSql("gen_random_uuid()")
                 .ValueGeneratedOnAdd();
 
             // Настройка TypeOfBlades

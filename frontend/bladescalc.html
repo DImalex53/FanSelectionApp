@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подбор по типу лопаток</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <style>
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 16px;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .graphs-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .graph-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .graph-card:hover {
+            border-color: #2563eb;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+        }
+        
+        .graph-card.selected {
+            border-color: #2563eb;
+            background-color: #f0f7ff;
+        }
+        
+        .graph-image {
+            width: 100%;
+            height: 300px;
+            object-fit: contain;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+        
+        .graph-info {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .graph-info strong {
+            color: #333;
+        }
+        
+        .download-section {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8fafc;
+            border-radius: 8px;
+        }
+        
+        .download-section.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-card">
+            <h1 class="form-title">Подбор вентилятора</h1>
+            
+            <!-- Вкладки -->
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('speedcalc')">По быстроходности</button>
+                <button class="tab" onclick="showTab('bladescalc')">По типу лопаток</button>
+            </div>
+            
+            <!-- Вкладка "По быстроходности" -->
+            <div id="speedcalc" class="tab-content active">
+                <p class="form-subtitle">Введите основные параметры для построения графика</p>
+                
+                <form id="speedcalcForm">
+                    <div class="grid-container">
+                        <div class="input-group">
+                            <label for="FlowRateRequired" class="input-label">Производительность (м³/ч)</label>
+                            <input type="number" step="0.01" id="FlowRateRequired" name="FlowRateRequired" value="100000" class="input-field" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="SystemResistance" class="input-label">Давление (Па)</label>
+                            <input type="number" step="0.01" id="SystemResistance" name="SystemResistance" value="6000" class="input-field" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="Density" class="input-label">Плотность среды (кг/м³)</label>
+                            <input type="number" step="0.01" id="Density" name="Density" value="1.204" class="input-field" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="Rpm" class="input-label">Обороты (об/мин)</label>
+                            <input type="number" id="Rpm" name="Rpm" value="990" class="input-field" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="SuctionType" class="input-label">Тип всасывания</label>
+                            <select id="SuctionType" name="SuctionType" class="select-field" required>
+                                <option value="0">Односторонний</option>
+                                <option value="1">Двусторонний</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="Type" class="input-label">Тип перемещаемой среды</label>
+                            <select id="Type" name="Type" class="select-field" required>
+                                <option value="1">Чистый воздух</option>
+                                <option value="2">Дымовой газ</option>
+                                <option value="3">С налипанием</option>
+                                <option value="4">Абразив</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="button" id="showGraphBtn" class="btn" disabled>Построить график</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Вкладка "По типу лопаток" -->
+            <div id="bladescalc" class="tab-content">
+                <p class="form-subtitle">Введите параметры для подбора по типу лопаток</p>
+                
+                <form id="bladescalcForm">
+                    <div class="grid-container">
+                        <div class="input-group">
+                            <label for="BladesFlowRateRequired" class="input-label">Производительность (м³/ч)</label>
+                            <input type="number" step="0.01" id="BladesFlowRateRequired" name="FlowRateRequired" value="100000" class="input-field" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="BladesSystemResistance" class="input-label">Давление (Па)</label>
+                            <input type="number" step="0.01" id="BladesSystemResistance" name="SystemResistance" value="6000" class="input-field" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="BladesDensity" class="input-label">Плотность среды (кг/м³)</label>
+                            <input type="number" step="0.01" id="BladesDensity" name="Density" value="1.204" class="input-field" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="SuctionTypeBlades" class="input-label">Тип всасывания</label>
+                            <select id="SuctionTypeBlades" name="SuctionType" class="select-field" required>
+                                <option value="0">Односторонний</option>
+                                <option value="1">Двусторонний</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="TypeOfBladesKod" class="input-label">Тип лопаток</label>
+                            <select id="TypeOfBladesKod" name="TypeOfBladesKod" class="select-field" required>
+                                <option value="1">Назад загнутые</option>
+                                <option value="2">Радиально оканчивающиеся</option>
+                                <option value="3">Аэрофольные</option>
+                                <option value="4">Прямые, отклоенные назад</option>
+                                <option value="5">Вперед загнутые</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="TypeOfPressure" class="input-label">Тип подбора</label>
+                            <select id="TypeOfPressure" name="TypeOfPressure" class="select-field" required>
+                                <option value="0">По статическому давлению</option>
+                                <option value="1">По полному давлению</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="button" id="showResultsBtn" class="btn" disabled>Показать результаты</button>
+                    </div>
+                </form>
+                
+                <!-- Результаты -->
+                <div id="resultsContainer" class="hidden">
+                    <h2 class="section-title">Результаты подбора</h2>
+                    <div id="graphsContainer" class="graphs-container">
+                        <!-- Графики будут добавлены динамически -->
+                    </div>
+                    
+                    <div class="download-section hidden" id="downloadSection">
+                        <h3>Выберите подходящий вариант и скачайте техническое предложение</h3>
+                        <button type="button" id="downloadProposalBtn" class="btn secondary-btn" disabled>Скачать техническое предложение</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedGraphId = null;
+        let allGraphsData = [];
+
+        // Переключение вкладок
+        function showTab(tabName) {
+            // Скрываем все вкладки
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Показываем выбранную вкладку
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Проверка заполнения полей для SpeedCalc
+        document.getElementById('speedcalcForm').addEventListener('input', function() {
+            const requiredFields = this.querySelectorAll('[required]');
+            let allFilled = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value) {
+                    allFilled = false;
+                }
+            });
+            
+            document.getElementById('showGraphBtn').disabled = !allFilled;
+        });
+
+        // Проверка заполнения полей для BladesCalc
+        document.getElementById('bladescalcForm').addEventListener('input', function() {
+            const requiredFields = this.querySelectorAll('[required]');
+            let allFilled = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value) {
+                    allFilled = false;
+                }
+            });
+            
+            document.getElementById('showResultsBtn').disabled = !allFilled;
+        });
+
+        // Обработка кнопки "Показать результаты" для BladesCalc
+        document.getElementById('showResultsBtn').addEventListener('click', async function() {
+            const form = document.getElementById('bladescalcForm');
+            const formData = new FormData(form);
+            const params = {};
+            
+            // Собираем все данные формы
+            formData.forEach((value, key) => {
+                if (value === '') {
+                    params[key] = null;
+                } else if (form.elements[key].type === 'checkbox') {
+                    params[key] = form.elements[key].checked;
+                } else if (!isNaN(value) && value !== '') {
+                    params[key] = Number(value);
+                } else {
+                    params[key] = value;
+                }
+            });
+
+            // Добавляем недостающие параметры
+            params.RightSchemeChoose = "Автоматический выбор";
+            params.NalichieVFD = 0;
+            params.TypeOfChoose = 0;
+
+            try {
+                // Получаем все графики
+                const response = await fetch('http://localhost:5000/api/Aerodynamics/getgraphs', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(params)
+                });
+
+                if (response.ok) {
+                    allGraphsData = await response.json();
+                    displayGraphs(allGraphsData);
+                    document.getElementById('resultsContainer').classList.remove('hidden');
+                    document.getElementById('downloadSection').classList.remove('hidden');
+                    
+                    // Прокручиваем к результатам
+                    document.getElementById('resultsContainer').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    const error = await response.text();
+                    alert(`Ошибка: ${error}`);
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Не удалось получить результаты');
+            }
+        });
+
+        // Отображение графиков
+        function displayGraphs(graphs) {
+            const container = document.getElementById('graphsContainer');
+            container.innerHTML = '';
+
+            graphs.forEach(graph => {
+                const graphCard = document.createElement('div');
+                graphCard.className = 'graph-card';
+                graphCard.onclick = () => selectGraph(graph.GraphId);
+
+                const imageBlob = new Blob([graph.GraphImage], { type: 'image/png' });
+                const imageUrl = URL.createObjectURL(imageBlob);
+
+                graphCard.innerHTML = `
+                    <img src="${imageUrl}" alt="График" class="graph-image">
+                    <div class="graph-info">
+                        <div><strong>Название:</strong> ${graph.GraphName}</div>
+                        <div><strong>КПД:</strong> ${graph.Efficiency.toFixed(2)}%</div>
+                        <div><strong>Статическое давление:</strong> ${graph.StaticPressure.toFixed(0)} Па</div>
+                        <div><strong>Диаметр:</strong> ${graph.Diameter.toFixed(3)} м</div>
+                        <div><strong>Обороты:</strong> ${graph.Rpm} об/мин</div>
+                        <div><strong>Марка вентилятора:</strong> ${graph.FanMark}</div>
+                    </div>
+                `;
+
+                container.appendChild(graphCard);
+            });
+        }
+
+        // Выбор графика
+        function selectGraph(graphId) {
+            selectedGraphId = graphId;
+            
+            // Убираем выделение со всех карточек
+            document.querySelectorAll('.graph-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Выделяем выбранную карточку
+            event.currentTarget.classList.add('selected');
+            
+            // Активируем кнопку скачивания
+            document.getElementById('downloadProposalBtn').disabled = false;
+        }
+
+        // Скачивание технического предложения
+        document.getElementById('downloadProposalBtn').addEventListener('click', async function() {
+            if (!selectedGraphId) {
+                alert('Выберите график для скачивания технического предложения');
+                return;
+            }
+
+            const selectedGraph = allGraphsData.find(g => g.GraphId === selectedGraphId);
+            if (!selectedGraph) {
+                alert('Ошибка: выбранный график не найден');
+                return;
+            }
+
+            // Создаем параметры для скачивания
+            const downloadParams = {
+                FlowRateRequired: parseFloat(document.getElementById('BladesFlowRateRequired').value),
+                SystemResistance: parseFloat(document.getElementById('BladesSystemResistance').value),
+                Density: parseFloat(document.getElementById('BladesDensity').value),
+                SuctionType: parseInt(document.getElementById('SuctionTypeBlades').value),
+                TypeOfBladesKod: parseInt(document.getElementById('TypeOfBladesKod').value),
+                TypeOfPressure: parseInt(document.getElementById('TypeOfPressure').value),
+                RightSchemeChoose: selectedGraph.GraphName,
+                NalichieVFD: 0,
+                TypeOfChoose: 0
+            };
+
+            try {
+                const response = await fetch('http://localhost:5000/api/Aerodynamics/downloadfile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(downloadParams)
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'Техническое_предложение.pdf';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                } else {
+                    const error = await response.text();
+                    alert(`Ошибка: ${error}`);
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Не удалось скачать техническое предложение');
+            }
+        });
+    </script>
+</body>
+</html>

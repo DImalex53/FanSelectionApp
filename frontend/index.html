@@ -40,6 +40,15 @@
                                 <option value="1">Двусторонний</option>
                             </select>
                         </div>
+                        <div class="input-group">
+                            <label for="Type" class="input-label">Тип перемещаемой среды</label>
+                            <select id="Type" name="Type" class="select-field" required>
+                                <option value="1">Чистый воздух</option>
+                                <option value="2">Дымовой газ</option>
+                                <option value="3">С налипанием</option>
+                                <option value="4">Абразив</option>
+                            </select>
+                        </div>
                     </div>
                     
                     <div class="text-center">
@@ -58,6 +67,7 @@
                         <div class="readonly-value">Плотность: <span id="densityValue">1.204</span> кг/м³</div>
                         <div class="readonly-value">Обороты: <span id="rpmValue">990</span> об/мин</div>
                         <div class="readonly-value">Тип всасывания: <span id="suctionValue">Односторонний</span></div>
+                        <div class="readonly-value">Тип среды: <span id="typeValue">Чистый воздух</span></div>
                     </div>
                 </div>
                 
@@ -211,6 +221,10 @@
                     document.getElementById('densityValue').textContent = params.Density;
                     document.getElementById('rpmValue').textContent = params.Rpm;
                     document.getElementById('suctionValue').textContent = params.SuctionType === '0' ? 'Односторонний' : 'Двусторонний';
+                    document.getElementById('typeValue').textContent = params.Type === '1' ? 'Чистый воздух' : (params.Type === '2' ? 'Дымовой газ' : (params.Type === '3' ? 'С налипанием' : 'Абразив'));
+                    
+                    // Сохраняем основные параметры для передачи в downloadFile
+                    window.primaryParamsData = { ...params };
                     
                     // Загружаем график
                     const response = await fetch('http://localhost:5238/api/SpeedCalcSelection/downloadpng', {
@@ -247,7 +261,7 @@
                 const formData = new FormData(form);
                 const params = {};
                 
-                // Собираем все данные формы
+                // Собираем все данные формы (дополнительные параметры)
                 formData.forEach((value, key) => {
                     if (value === '') {
                         params[key] = null;
@@ -259,6 +273,14 @@
                         params[key] = value;
                     }
                 });
+                
+                // Объединяем с основными параметрами, которые были сохранены при построении графика
+                if (window.primaryParamsData) {
+                    Object.assign(params, window.primaryParamsData);
+                }
+                
+                // Логируем все параметры для отладки
+                console.log('Все параметры для скачивания:', params);
                 
                 try {
                     const response = await fetch('http://localhost:5238/api/SpeedCalcSelection/downloadfile', {
