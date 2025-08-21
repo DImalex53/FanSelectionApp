@@ -270,26 +270,25 @@ public static class PaintDiagramHelper
         return aerodynamicPlot;
     }
     public static byte[] GetDiagramAsImageBytes(
-    BladesCalculationParameters parameters,
-    double staticPressure1,
-    double staticPressure2,
-    double staticPressure3,
-    double minDeltaEfficiency,
-    double maxDeltaEfficiency,
-    double outletLength,
-    double outletWidth,
-    double efficiency1,
-    double efficiency2,
-    double efficiency3,
-    double efficiency4,
-    string newMarkOfFan,
-    string newMarkOfFand,
-    double diameter,
-    int rpm,
-    int width,
-    int height,
-    string imageFormat
-        )
+        BladesCalculationParameters parameters,
+        double staticPressure1,
+        double staticPressure2,
+        double staticPressure3,
+        double minDeltaEfficiency,
+        double maxDeltaEfficiency,
+        double outletLength,
+        double outletWidth,
+        double efficiency1,
+        double efficiency2,
+        double efficiency3,
+        double efficiency4,
+        string newMarkOfFan,
+        string newMarkOfFand,
+        double diameter,
+        int rpm,
+        int width,
+        int height,
+        string imageFormat )
     {
         var plot = GetDiagrameDraw(
             parameters,
@@ -465,7 +464,7 @@ public static class PaintDiagramHelper
         }
 
             // Интерполируем обе кривые для поиска пересечения
-            var pressureCurve = MathNet.Numerics.Interpolation.CubicSpline.InterpolateAkima(flowRates, pressures);
+        var pressureCurve = MathNet.Numerics.Interpolation.CubicSpline.InterpolateAkima(flowRates, pressures);
         var resistanceCurve = MathNet.Numerics.Interpolation.CubicSpline.InterpolateAkima(flowRates1, pressureResistances);
 
         // Функция для поиска корня (разницы между кривыми)

@@ -39,7 +39,7 @@ public class AerodynamicsController(IAerodynamicService calculationService) : Co
 
         try
         {
-            var fileBytes = await _service.GenerateFileAsync(parameters);
+            var fileBytes = await _service.DownloadFileAsync(parameters);
             return File(fileBytes, "application/pdf", "Техническое_предложение.pdf");
         }
         catch (Exception ex)

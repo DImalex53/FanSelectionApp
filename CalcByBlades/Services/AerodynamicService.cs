@@ -8,125 +8,116 @@ namespace BladesCalc.Services;
 
 public class AerodynamicService(IAerodynamicsDataBladesRepository aerodynamicsDataRepository) : IAerodynamicService
 {
-    private readonly IAerodynamicsDataBladesRepository _aerodynamicsDataRepository = aerodynamicsDataRepository;
+    private readonly IAerodynamicsDataBladesRepository _dataBladesRepository = aerodynamicsDataRepository;
 
     public async Task<List<GraphData>> GetAllGraphsAsync(BladesCalculationParameters parameters)
     {
-        var allData = (await _aerodynamicsDataRepository.GetAllAsync()).ToList();
+        var allData = (await _dataBladesRepository.GetAllAsync()).ToList();
         var graphs = new List<GraphData>();
 
-        // Получаем все возможные варианты по типу лопаток
-        var bladeTypes = new[] { 1, 2, 3, 4, 5 }; // Все типы лопаток
-        var pressureTypes = new[] { 0, 1 }; // По статическому и полному давлению
+        var bladeType = parameters.TypeOfBladesKod;
+        var pressureType = parameters.TypeOfPressure;
 
+
+        var filteredData = allData.Where(d => d.TypeOfBladesKod == (TypeOfBladesKodNumber)parameters.TypeOfBladesKod).ToList();
         int graphId = 1;
-        foreach (var bladeType in bladeTypes)
+        // Создаем копию параметров с текущими типами
+        var currentParams = new BladesCalculationParameters
         {
-            foreach (var pressureType in pressureTypes)
+            FlowRateRequired = parameters.FlowRateRequired,
+            SystemResistance = parameters.SystemResistance,
+            Density = parameters.Density,
+            SuctionType = parameters.SuctionType,
+            TypeOfBladesKod = parameters.Type,
+            TypeOfPressure = pressureType,
+            RightSchemeChoose = $"Автоматический подбор - Тип лопаток {bladeType}, Давление {(pressureType == 0 ? "Статическое" : "Полное")}",
+            NalichieVFD = parameters.NalichieVFD,
+            TypeOfChoose = parameters.TypeOfChoose
+        };
+            // Получаем данные о схеме для диаметра и оборотов
+        var rightSchemes = PaintDiagramsHelper.GenerateTableOfRightSchemes(filteredData, parameters, new ParametersDrawImage());
+        var aerodinamicByTypeBladesRow = filteredData.FirstOrDefault();
+
+
+        foreach (var rowScheme in rightSchemes)
+        {
+            try
             {
-                try
+                var aerodynamicPlot = PaintDiagramHelper.GetDiagrameDraw(
+                               currentParams,
+                               aerodinamicByTypeBladesRow.StaticPressure1,
+                               aerodinamicByTypeBladesRow.StaticPressure2,
+                               aerodinamicByTypeBladesRow.StaticPressure3,
+                               aerodinamicByTypeBladesRow.MinDeltaEfficiency,
+                               aerodinamicByTypeBladesRow.MaxDeltaEfficiency,
+                               aerodinamicByTypeBladesRow.OutletLength,
+                               aerodinamicByTypeBladesRow.OutletWidth,
+                               aerodinamicByTypeBladesRow.Efficiency1,
+                               aerodinamicByTypeBladesRow.Efficiency2,
+                               aerodinamicByTypeBladesRow.Efficiency3,
+                               aerodinamicByTypeBladesRow.Efficiency4,
+                               aerodinamicByTypeBladesRow.NewMarkOfFan,
+                               aerodinamicByTypeBladesRow.NewMarkOfFand,
+                               rowScheme.Diameter,
+                               rowScheme.Rpm);
+
+                if (aerodynamicPlot != null)
                 {
-                    // Создаем копию параметров с текущими типами
-                    var currentParams = new BladesCalculationParameters
+                    // Конвертируем график в изображение
+                    var imageBytes = PaintDiagramHelper.GetDiagramAsImageBytes(
+                        currentParams,
+                        aerodinamicByTypeBladesRow.StaticPressure1,
+                        aerodinamicByTypeBladesRow.StaticPressure2,
+                        aerodinamicByTypeBladesRow.StaticPressure3,
+                        aerodinamicByTypeBladesRow.MinDeltaEfficiency,
+                        aerodinamicByTypeBladesRow.MaxDeltaEfficiency,
+                        aerodinamicByTypeBladesRow.OutletLength,
+                        aerodinamicByTypeBladesRow.OutletWidth,
+                        aerodinamicByTypeBladesRow.Efficiency1,
+                        aerodinamicByTypeBladesRow.Efficiency2,
+                        aerodinamicByTypeBladesRow.Efficiency3,
+                        aerodinamicByTypeBladesRow.Efficiency4,
+                        aerodinamicByTypeBladesRow.NewMarkOfFan,
+                        aerodinamicByTypeBladesRow.NewMarkOfFand,
+                        rowScheme.Diameter,
+                        rowScheme.Rpm,
+                        800, 600, "PNG");
+
+                    var graphData = new GraphData
                     {
-                        FlowRateRequired = parameters.FlowRateRequired,
-                        SystemResistance = parameters.SystemResistance,
-                        Density = parameters.Density,
-                        SuctionType = parameters.SuctionType,
-                        TypeOfBladesKod = bladeType,
-                        TypeOfPressure = pressureType,
-                        RightSchemeChoose = $"Автоматический подбор - Тип лопаток {bladeType}, Давление {(pressureType == 0 ? "Статическое" : "Полное")}",
-                        NalichieVFD = parameters.NalichieVFD,
-                        TypeOfChoose = parameters.TypeOfChoose
+                        GraphId = graphId++,
+                        GraphName = $"Тип лопаток: {bladeType.ToString()}, Давление: {(pressureType == 0 ? "Статическое" : "Полное")}",
+                        GraphImage = imageBytes,
+                        Efficiency = aerodinamicByTypeBladesRow.Efficiency1,
+                        StaticPressure = aerodinamicByTypeBladesRow.StaticPressure1,
+                        Diameter = rowScheme.Diameter,
+                        Rpm = rowScheme.Rpm,
+                        FanMark = aerodinamicByTypeBladesRow.NewMarkOfFan ?? "",
+                        FanMarkD = aerodinamicByTypeBladesRow.NewMarkOfFand ?? "",
+                        ImpellerWidth = aerodinamicByTypeBladesRow.ImpellerWidth,
+                        BladeWidth = aerodinamicByTypeBladesRow.BladeWidth,
+                        BladeLength = aerodinamicByTypeBladesRow.BladeLength,
+                        NumberOfBlades = aerodinamicByTypeBladesRow.NumberOfBlades,
+                        ImpellerInletDiameter = aerodinamicByTypeBladesRow.ImpellerInletDiameter,
+                        TypeOfBlades = bladeType.ToString(),
                     };
 
-                    var aerodinamicByTypeBladesRow = AerodinamicHelper.GetAerodynamicByTypeBladesRow(allData, currentParams);
-                    
-                    if (aerodinamicByTypeBladesRow != null)
-                    {
-                        // Получаем данные о схеме для диаметра и оборотов
-                        var rowOfRightSchemes = AerodinamicHelper.GetRowOfRightSchemes(allData, currentParams, new ParametersDrawImage());
-                        
-                        if (rowOfRightSchemes != null)
-                        {
-                            var aerodynamicPlot = PaintDiagramHelper.GetDiagrameDraw(
-                                currentParams,
-                                aerodinamicByTypeBladesRow.StaticPressure1,
-                                aerodinamicByTypeBladesRow.StaticPressure2,
-                                aerodinamicByTypeBladesRow.StaticPressure3,
-                                aerodinamicByTypeBladesRow.MinDeltaEfficiency,
-                                aerodinamicByTypeBladesRow.MaxDeltaEfficiency,
-                                aerodinamicByTypeBladesRow.OutletLength,
-                                aerodinamicByTypeBladesRow.OutletWidth,
-                                aerodinamicByTypeBladesRow.Efficiency1,
-                                aerodinamicByTypeBladesRow.Efficiency2,
-                                aerodinamicByTypeBladesRow.Efficiency3,
-                                aerodinamicByTypeBladesRow.Efficiency4,
-                                aerodinamicByTypeBladesRow.NewMarkOfFan,
-                                aerodinamicByTypeBladesRow.NewMarkOfFand,
-                                rowOfRightSchemes.Diameter,
-                                rowOfRightSchemes.Rpm);
-
-                            if (aerodynamicPlot != null)
-                            {
-                                // Конвертируем график в изображение
-                                var imageBytes = PaintDiagramHelper.GetDiagramAsImageBytes(
-                                    currentParams,
-                                    aerodinamicByTypeBladesRow.StaticPressure1,
-                                    aerodinamicByTypeBladesRow.StaticPressure2,
-                                    aerodinamicByTypeBladesRow.StaticPressure3,
-                                    aerodinamicByTypeBladesRow.MinDeltaEfficiency,
-                                    aerodinamicByTypeBladesRow.MaxDeltaEfficiency,
-                                    aerodinamicByTypeBladesRow.OutletLength,
-                                    aerodinamicByTypeBladesRow.OutletWidth,
-                                    aerodinamicByTypeBladesRow.Efficiency1,
-                                    aerodinamicByTypeBladesRow.Efficiency2,
-                                    aerodinamicByTypeBladesRow.Efficiency3,
-                                    aerodinamicByTypeBladesRow.Efficiency4,
-                                    aerodinamicByTypeBladesRow.NewMarkOfFan,
-                                    aerodinamicByTypeBladesRow.NewMarkOfFand,
-                                    rowOfRightSchemes.Diameter,
-                                    rowOfRightSchemes.Rpm,
-                                    800, 600, "PNG");
-
-                                var graphData = new GraphData
-                                {
-                                    GraphId = graphId++,
-                                    GraphName = $"Тип лопаток: {GetBladeTypeName(bladeType)}, Давление: {(pressureType == 0 ? "Статическое" : "Полное")}",
-                                    GraphImage = imageBytes,
-                                    Efficiency = aerodinamicByTypeBladesRow.Efficiency1,
-                                    StaticPressure = aerodinamicByTypeBladesRow.StaticPressure1,
-                                    Diameter = rowOfRightSchemes.Diameter,
-                                    Rpm = rowOfRightSchemes.Rpm,
-                                    FanMark = aerodinamicByTypeBladesRow.NewMarkOfFan ?? "",
-                                    FanMarkD = aerodinamicByTypeBladesRow.NewMarkOfFand ?? "",
-                                    ImpellerWidth = aerodinamicByTypeBladesRow.ImpellerWidth,
-                                    BladeWidth = aerodinamicByTypeBladesRow.BladeWidth,
-                                    BladeLength = aerodinamicByTypeBladesRow.BladeLength,
-                                    NumberOfBlades = aerodinamicByTypeBladesRow.NumberOfBlades,
-                                    ImpellerInletDiameter = aerodinamicByTypeBladesRow.ImpellerInletDiameter,
-                                    TypeOfBlades = GetBladeTypeName(bladeType)
-                                };
-
-                                graphs.Add(graphData);
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // Логируем ошибку, но продолжаем с другими вариантами
-                    Console.WriteLine($"Ошибка при генерации графика для типа лопаток {bladeType}, давления {pressureType}: {ex.Message}");
+                    graphs.Add(graphData);
                 }
             }
-        }
+            catch (Exception ex)
+            {
 
+            }
+        
+        }
+           
         return graphs;
     }
 
     public async Task<byte[]> GenerateFileAsync(BladesCalculationParameters parameters)
     {
-        var allData = (await _aerodynamicsDataRepository.GetAllAsync()).ToList();
+        var allData = (await _dataBladesRepository.GetAllAsync()).ToList();
 
         var aerodinamicByTypeBladesRow = AerodinamicHelper.GetAerodynamicByTypeBladesRow(allData, parameters);
         var rowOfRightSchemes = AerodinamicHelper.GetRowOfRightSchemes(allData, parameters, new ParametersDrawImage());
@@ -251,4 +242,9 @@ public class AerodynamicService(IAerodynamicsDataBladesRepository aerodynamicsDa
         5 => "Вперед загнутые",
         _ => "Неизвестный тип"
     };
+
+    public Task<byte[]> DownloadFileAsync(BladesCalculationParameters parameters)
+    {
+        throw new NotImplementedException();
+    }
 }

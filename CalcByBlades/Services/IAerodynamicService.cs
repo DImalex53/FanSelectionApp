@@ -5,5 +5,6 @@ namespace BladesCalc.Services;
 
 public interface IAerodynamicService
 {
-    public Task DownloadFileAsync(BladesCalculationParameters parameters, ParametersDrawImage parametersDrawImage);
+    public Task<byte[]> DownloadFileAsync(BladesCalculationParameters parameters);
+    public Task<List<GraphData>> GetAllGraphsAsync(BladesCalculationParameters parameters);
 }
