@@ -13,19 +13,11 @@ public static class PaintDiagramsHelper
 
         foreach (var aerodynamicRow in aerodynamicsByTypeBlades)
         {
-            try
+            var rightSchemes = GetRightSchemes(aerodynamicRow, parameters, parametersDrawImage);
+
+            if (rightSchemes.Any())
             {
-
-                var rightSchemes = GetRightSchemes(aerodynamicRow, parameters, parametersDrawImage);
-
-                if (rightSchemes.Any())
-                {
-                    resultRightSchemes.AddRange(rightSchemes);
-                }
-            }
-            catch (Exception ex)
-            {
-
+                resultRightSchemes.AddRange(rightSchemes);
             }
         }
 
@@ -55,13 +47,18 @@ public static class PaintDiagramsHelper
         var nameOfFan = parameters.SuctionType == 1 ? aerodynamicRow.NewMarkOfFand : aerodynamicRow.NewMarkOfFan;
 
         double diameter = MinDiameter;
-        int rpm;
         int maxHalfPoluces = parameters.NalichieVFD == 1 ? 61 : 6;
-
+        int minHalfPoluces = 1;
+        int rpm;
         for (int k = 0; diameter < MaxDiameter; k++)
         {
             for (int halfPoluces = maxHalfPoluces; halfPoluces > 0; halfPoluces--)
             {
+                if (halfPoluces < minHalfPoluces)
+                {
+                    continue;
+                }
+
                 rpm = MaxRPM / halfPoluces;
 
                 var pressure = parameters.TypeOfPressure == 0
@@ -142,7 +139,7 @@ public static class PaintDiagramsHelper
                     DiagramAsImageBytes = aerodynamicPlotBytes,
                 });
 
-                maxHalfPoluces--;
+                minHalfPoluces++;
             }
 
             diameter += 0.05;

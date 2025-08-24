@@ -19,56 +19,32 @@ namespace SpeedCalc.Repositories
 
         public async Task<AerodynamicsData> GetByIdAsync(Guid id)
         {
-            try
-            {
-                return await _context.AerodynamicsData
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(a => a.Id == id);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при получении данных аэродинамики по ID: {Id}", id);
-                throw;
-            }
+            return await _context.AerodynamicsData
+                .AsNoTracking()
+                .FirstOrDefaultAsync(a => a.Id == id);
         }
 
         public async Task<IEnumerable<AerodynamicsData>> GetAllAsync()
         {
-            try
-            {
-                return await _context.AerodynamicsData
-                    .AsNoTracking()
-                    .OrderBy(a => a.Type)
-                    .ThenBy(a => a.MinSpeed)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при получении всех данных аэродинамики");
-                throw;
-            }
+            return await _context.AerodynamicsData
+                .AsNoTracking()
+                .OrderBy(a => a.Type)
+                .ThenBy(a => a.MinSpeed)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<AerodynamicsData>> GetByTypeAsync(AerodynamicsType? type)
         {
-            try
-            {
-                var query = _context.AerodynamicsData.AsNoTracking();
+            var query = _context.AerodynamicsData.AsNoTracking();
 
-                if (type.HasValue)
-                {
-                    query = query.Where(a => a.Type == type.Value);
-                }
-
-                return await query
-                    .OrderBy(a => a.MinSpeed)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
+            if (type.HasValue)
             {
-                _logger.LogError(ex, "Ошибка при получении данных аэродинамики по типу: {Type}", type);
-                throw;
+                query = query.Where(a => a.Type == type.Value);
             }
+
+            return await query
+                .OrderBy(a => a.MinSpeed)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<AerodynamicsData>> GetByBladeTypeAsync(string bladeType)
@@ -76,20 +52,12 @@ namespace SpeedCalc.Repositories
             if (string.IsNullOrWhiteSpace(bladeType))
                 throw new ArgumentException("Тип лопастей не может быть пустым", nameof(bladeType));
 
-            try
-            {
-                return await _context.AerodynamicsData
-                    .Where(a => a.TypeOfBlades != null && a.TypeOfBlades.Contains(bladeType))
-                    .AsNoTracking()
-                    .OrderBy(a => a.Type)
-                    .ThenBy(a => a.MinSpeed)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при получении данных аэродинамики по типу лопастей: {BladeType}", bladeType);
-                throw;
-            }
+            return await _context.AerodynamicsData
+                .Where(a => a.TypeOfBlades != null && a.TypeOfBlades.Contains(bladeType))
+                .AsNoTracking()
+                .OrderBy(a => a.Type)
+                .ThenBy(a => a.MinSpeed)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<AerodynamicsData>> GetBySpeedRangeAsync(double minSpeed, double maxSpeed)
@@ -97,20 +65,12 @@ namespace SpeedCalc.Repositories
             if (minSpeed < 0 || maxSpeed < 0 || minSpeed > maxSpeed)
                 throw new ArgumentException("Недопустимый диапазон скоростей");
 
-            try
-            {
-                return await _context.AerodynamicsData
-                    .Where(a => a.MinSpeed <= maxSpeed && a.MaxSpeed >= minSpeed)
-                    .AsNoTracking()
-                    .OrderBy(a => a.Type)
-                    .ThenBy(a => a.MinSpeed)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при получении данных аэродинамики по диапазону скоростей: {MinSpeed}-{MaxSpeed}", minSpeed, maxSpeed);
-                throw;
-            }
+            return await _context.AerodynamicsData
+                .Where(a => a.MinSpeed <= maxSpeed && a.MaxSpeed >= minSpeed)
+                .AsNoTracking()
+                .OrderBy(a => a.Type)
+                .ThenBy(a => a.MinSpeed)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<AerodynamicsData>> GetByAerodynamicSchemeAsync(string schemeName)
@@ -118,20 +78,12 @@ namespace SpeedCalc.Repositories
             if (string.IsNullOrWhiteSpace(schemeName))
                 throw new ArgumentException("Название схемы не может быть пустым", nameof(schemeName));
 
-            try
-            {
-                return await _context.AerodynamicsData
-                    .Where(a => a.Name != null && a.Name.Contains(schemeName))
-                    .AsNoTracking()
-                    .OrderBy(a => a.Type)
-                    .ThenBy(a => a.MinSpeed)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при получении данных аэродинамики по схеме: {SchemeName}", schemeName);
-                throw;
-            }
+            return await _context.AerodynamicsData
+                .Where(a => a.Name != null && a.Name.Contains(schemeName))
+                .AsNoTracking()
+                .OrderBy(a => a.Type)
+                .ThenBy(a => a.MinSpeed)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<AerodynamicsData>> GetByFanMarkAsync(string fanMark)
@@ -139,20 +91,12 @@ namespace SpeedCalc.Repositories
             if (string.IsNullOrWhiteSpace(fanMark))
                 throw new ArgumentException("Марка вентилятора не может быть пустой", nameof(fanMark));
 
-            try
-            {
-                return await _context.AerodynamicsData
-                    .Where(a => a.NewMarkOfFan != null && a.NewMarkOfFan.Contains(fanMark))
-                    .AsNoTracking()
-                    .OrderBy(a => a.Type)
-                    .ThenBy(a => a.MinSpeed)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при получении данных аэродинамики по марке вентилятора: {FanMark}", fanMark);
-                throw;
-            }
+            return await _context.AerodynamicsData
+                .Where(a => a.NewMarkOfFan != null && a.NewMarkOfFan.Contains(fanMark))
+                .AsNoTracking()
+                .OrderBy(a => a.Type)
+                .ThenBy(a => a.MinSpeed)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<AerodynamicsData>> GetByFanMarkDAsync(string fanMarkD)
@@ -160,20 +104,12 @@ namespace SpeedCalc.Repositories
             if (string.IsNullOrWhiteSpace(fanMarkD))
                 throw new ArgumentException("Марка вентилятора D не может быть пустой", nameof(fanMarkD));
 
-            try
-            {
-                return await _context.AerodynamicsData
-                    .Where(a => a.NewMarkOfFanD != null && a.NewMarkOfFanD.Contains(fanMarkD))
-                    .AsNoTracking()
-                    .OrderBy(a => a.Type)
-                    .ThenBy(a => a.MinSpeed)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при получении данных аэродинамики по марке вентилятора D: {FanMarkD}", fanMarkD);
-                throw;
-            }
+            return await _context.AerodynamicsData
+                .Where(a => a.NewMarkOfFanD != null && a.NewMarkOfFanD.Contains(fanMarkD))
+                .AsNoTracking()
+                .OrderBy(a => a.Type)
+                .ThenBy(a => a.MinSpeed)
+                .ToListAsync();
         }
 
         public async Task<(IEnumerable<AerodynamicsData> Items, int TotalCount)> GetPaginatedAsync(
@@ -187,42 +123,32 @@ namespace SpeedCalc.Repositories
 
             if (pageSize < 1)
                 throw new ArgumentException("Размер страницы должен быть положительным", nameof(pageSize));
+            var query = _context.AerodynamicsData.AsNoTracking();
 
-            try
+            if (!string.IsNullOrWhiteSpace(sortField))
             {
-                var query = _context.AerodynamicsData.AsNoTracking();
-
-                // Применяем сортировку, если указано поле
-                if (!string.IsNullOrWhiteSpace(sortField))
+                var propertyInfo = typeof(AerodynamicsData).GetProperty(sortField);
+                if (propertyInfo == null)
                 {
-                    var propertyInfo = typeof(AerodynamicsData).GetProperty(sortField);
-                    if (propertyInfo == null)
-                    {
-                        throw new ArgumentException($"Неверное поле для сортировки: {sortField}");
-                    }
-
-                    query = ascending
-                        ? query.OrderByProperty(sortField)
-                        : query.OrderByPropertyDescending(sortField);
-                }
-                else
-                {
-                    query = query.OrderBy(a => a.Type).ThenBy(a => a.MinSpeed);
+                    throw new ArgumentException($"Неверное поле для сортировки: {sortField}");
                 }
 
-                var totalCount = await query.CountAsync();
-                var items = await query
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToListAsync();
-
-                return (items, totalCount);
+                query = ascending
+                    ? query.OrderByProperty(sortField)
+                    : query.OrderByPropertyDescending(sortField);
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex, "Ошибка при постраничном получении данных аэродинамики");
-                throw;
+                query = query.OrderBy(a => a.Type).ThenBy(a => a.MinSpeed);
             }
+
+            var totalCount = await query.CountAsync();
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
         }
 
         public async Task AddAsync(AerodynamicsData data)
@@ -230,16 +156,8 @@ namespace SpeedCalc.Repositories
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
 
-            try
-            {
-                await _context.AerodynamicsData.AddAsync(data);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при добавлении данных аэродинамики");
-                throw;
-            }
+            await _context.AerodynamicsData.AddAsync(data);
+            await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(AerodynamicsData data)
@@ -247,51 +165,27 @@ namespace SpeedCalc.Repositories
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
 
-            try
-            {
-                var existing = await _context.AerodynamicsData.FindAsync(data.Id);
-                if (existing == null)
-                    throw new KeyNotFoundException($"Данные аэродинамики с ID {data.Id} не найдены");
+            var existing = await _context.AerodynamicsData.FindAsync(data.Id);
+            if (existing == null)
+                throw new KeyNotFoundException($"Данные аэродинамики с ID {data.Id} не найдены");
 
-                _context.Entry(existing).CurrentValues.SetValues(data);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при обновлении данных аэродинамики с ID: {Id}", data.Id);
-                throw;
-            }
+            _context.Entry(existing).CurrentValues.SetValues(data);
+            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(Guid id)
         {
-            try
+            var data = await _context.AerodynamicsData.FindAsync(id);
+            if (data != null)
             {
-                var data = await _context.AerodynamicsData.FindAsync(id);
-                if (data != null)
-                {
-                    _context.AerodynamicsData.Remove(data);
-                    await _context.SaveChangesAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при удалении данных аэродинамики с ID: {Id}", id);
-                throw;
+                _context.AerodynamicsData.Remove(data);
+                await _context.SaveChangesAsync();
             }
         }
 
         public async Task<bool> ExistsAsync(Guid id)
         {
-            try
-            {
-                return await _context.AerodynamicsData.AnyAsync(a => a.Id == id);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при проверке существования данных аэродинамики с ID: {Id}", id);
-                throw;
-            }
+            return await _context.AerodynamicsData.AnyAsync(a => a.Id == id);
         }
     }
 

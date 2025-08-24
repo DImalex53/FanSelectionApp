@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Параметры подбора по быстроходности</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="form-card">
+            <h1 class="form-title">Параметры подбора по быстроходности</h1>
+            <p class="form-subtitle">Введите основные параметры для построения графика</p>
+            
+            <form id="calcForm">
+                <!-- Основные параметры -->
+                <div id="primaryParams">
+                    <div class="grid-container">
+                        <div class="input-group">
+                            <label for="FlowRateRequired" class="input-label">Производительность (м³/ч)</label>
+                            <input type="number" step="0.01" id="FlowRateRequired" name="FlowRateRequired" value="100000" class="input-field" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="SystemResistance" class="input-label">Давление (Па)</label>
+                            <input type="number" step="0.01" id="SystemResistance" name="SystemResistance" value="6000" class="input-field" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="Density" class="input-label">Плотность среды (кг/м³)</label>
+                            <input type="number" step="0.01" id="Density" name="Density" value="1.204" class="input-field" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="Rpm" class="input-label">Обороты (об/мин)</label>
+                            <input type="number" id="Rpm" name="Rpm" value="990" class="input-field" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="SuctionType" class="input-label">Тип всасывания</label>
+                            <select id="SuctionType" name="SuctionType" class="select-field" required>
+                                <option value="0">Односторонний</option>
+                                <option value="1">Двусторонний</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="Type" class="input-label">Тип перемещаемой среды</label>
+                            <select id="Type" name="Type" class="select-field" required>
+                                <option value="1">Чистый воздух</option>
+                                <option value="2">Дымовой газ</option>
+                                <option value="3">С налипанием</option>
+                                <option value="4">Абразив</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="button" id="showGraphBtn" class="btn" disabled>Построить график</button>
+                    </div>
+                </div>
+                
+                <!-- Результат -->
+                <div id="resultContainer" class="result-container hidden">
+                    <h2 class="section-title">Результаты расчета</h2>
+                    <div id="graphImage"></div>
+                    
+                    <div class="grid-container">
+                        <div class="readonly-value">Производительность: <span id="flowValue">100000</span> м³/ч</div>
+                        <div class="readonly-value">Давление: <span id="pressureValue">6000</span> Па</div>
+                        <div class="readonly-value">Плотность: <span id="densityValue">1.204</span> кг/м³</div>
+                        <div class="readonly-value">Обороты: <span id="rpmValue">990</span> об/мин</div>
+                        <div class="readonly-value">Тип всасывания: <span id="suctionValue">Односторонний</span></div>
+                        <div class="readonly-value">Тип среды: <span id="typeValue">Чистый воздух</span></div>
+                    </div>
+                </div>
+                
+                <!-- Дополнительные параметры -->
+                <div id="additionalParams" class="hidden">
+                    <h2 class="section-title">Дополнительные параметры</h2>
+                    <div class="grid-container">
+                        <!-- Электрические параметры -->
+                        <div class="input-group">
+                            <label for="MotorVoltage" class="input-label">Напряжение сети (В)</label>
+                            <input type="number" step="0.01" id="MotorVoltage" name="MotorVoltage" value="380" class="input-field">
+                        </div>
+                        
+                        <!-- Параметры материалов -->
+                        <div class="input-group">
+                            <label for="StartInletDensity" class="input-label">Плотность при пуске (кг/м³)</label>
+                            <input type="number" step="0.01" id="StartInletDensity" name="StartInletDensity" value="1.204" class="input-field">
+                        </div>
+                        <div class="input-group">
+                            <label for="MaterialDensyti" class="input-label">Плотность материала (кг/м³)</label>
+                            <input type="number" step="0.01" id="MaterialDensyti" name="MaterialDensyti" value="8000" class="input-field">
+                        </div>
+                        <div class="input-group">
+                            <label for="MaterialOfImpeller" class="input-label">Материал рабочего колеса</label>
+                            <input type="text" id="MaterialOfImpeller" name="MaterialOfImpeller" value="09Г2С" class="input-field">
+                        </div>
+                        <div class="input-group">
+                            <label for="MaterialOfUlita" class="input-label">Материал улиты</label>
+                            <input type="text" id="MaterialOfUlita" name="MaterialOfUlita" value="09Г2С" class="input-field">
+                        </div>
+                        
+                        <!-- Конструктивные параметры -->
+                        <div class="input-group">
+                            <label for="ConstructScheme" class="input-label">Конструктивная схема</label>
+                            <input type="number" id="ConstructScheme" name="ConstructScheme" class="input-field">
+                        </div>
+                        <div class="input-group">
+                            <label for="RotaitionDirection" class="input-label">Направление вращения</label>
+                            <select id="RotaitionDirection" name="RotaitionDirection" class="select-field">
+                                <option value="0">Правое</option>
+                                <option value="1">Левое</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="ExhaustDirection" class="input-label">Угол разворота корпуса (°)</label>
+                            <input type="number" id="ExhaustDirection" name="ExhaustDirection" class="input-field">
+                        </div>
+                        
+                        <!-- Флажки -->
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="Vibroisolation" name="Vibroisolation" class="checkbox-field">
+                            <label for="Vibroisolation" class="checkbox-label">Виброизоляция</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="GuideVane" name="GuideVane" class="checkbox-field">
+                            <label for="GuideVane" class="checkbox-label">Направляющий аппарат</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="Teploisolation" name="Teploisolation" class="checkbox-field">
+                            <label for="Teploisolation" class="checkbox-label">Теплошумоизоляция</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="FlangeInlet" name="FlangeInlet" class="checkbox-field">
+                            <label for="FlangeInlet" class="checkbox-label">Входной фланец</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="FlangeOutlet" name="FlangeOutlet" class="checkbox-field">
+                            <label for="FlangeOutlet" class="checkbox-label">Выходной фланец</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="NalichieVFD" name="NalichieVFD" class="checkbox-field">
+                            <label for="NalichieVFD" class="checkbox-label">Преобразователь частоты</label>
+                        </div>
+                        
+                        <!-- Дополнительные поля -->
+                        <div class="input-group">
+                            <label for="ProjectName" class="input-label">Название проекта</label>
+                            <input type="text" id="ProjectName" name="ProjectName" value="Изготовление и поставка тягодутьевой машины" class="input-field">
+                        </div>
+                        <div class="input-group">
+                            <label for="NumberOfTask" class="input-label">Номер задачи в Bitrix</label>
+                            <input type="number" id="NumberOfTask" name="NumberOfTask" class="input-field">
+                        </div>
+                        <div class="input-group">
+                            <label for="MaterialDesign" class="input-label">Материальное исполнение</label>
+                            <select id="MaterialDesign" name="MaterialDesign" class="select-field">
+                                <option value="1">K1</option>
+                                <option value="2">B</option>
+                                <option value="3">BK1</option>
+                                <option value="4">Ti</option>
+                                <option value="5" selected>09Г2С</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Кнопка скачивания ТП -->
+                    <div class="download-section">
+                        <button type="button" id="downloadProposalBtn" class="btn secondary-btn">Скачать техническое предложение</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('calcForm');
+            const primaryParams = document.getElementById('primaryParams');
+            const showGraphBtn = document.getElementById('showGraphBtn');
+            const resultContainer = document.getElementById('resultContainer');
+            const additionalParams = document.getElementById('additionalParams');
+            const graphImage = document.getElementById('graphImage');
+            const downloadProposalBtn = document.getElementById('downloadProposalBtn');
+            
+            // Проверка заполнения полей
+            form.addEventListener('input', function() {
+                const requiredFields = form.querySelectorAll('[required]');
+                let allFilled = true;
+                
+                requiredFields.forEach(field => {
+                    if (!field.value) {
+                        allFilled = false;
+                    }
+                });
+                
+                showGraphBtn.disabled = !allFilled;
+            });
+            
+            // Обработка кнопки "Построить график"
+            showGraphBtn.addEventListener('click', async function() {
+                const formData = new FormData(form);
+                const params = {};
+                
+                // Собираем все данные формы
+                formData.forEach((value, key) => {
+                    if (value === '') {
+                        params[key] = null;
+                    } else if (form.elements[key].type === 'checkbox') {
+                        params[key] = form.elements[key].checked;
+                    } else if (!isNaN(value) && value !== '') {
+                        params[key] = Number(value);
+                    } else {
+                        params[key] = value;
+                    }
+                });
+                
+                try {
+                    // Обновляем отображаемые значения
+                    document.getElementById('flowValue').textContent = params.FlowRateRequired;
+                    document.getElementById('pressureValue').textContent = params.SystemResistance;
+                    document.getElementById('densityValue').textContent = params.Density;
+                    document.getElementById('rpmValue').textContent = params.Rpm;
+                    document.getElementById('suctionValue').textContent = params.SuctionType === '0' ? 'Односторонний' : 'Двусторонний';
+                    document.getElementById('typeValue').textContent = params.Type === '1' ? 'Чистый воздух' : (params.Type === '2' ? 'Дымовой газ' : (params.Type === '3' ? 'С налипанием' : 'Абразив'));
+                    
+                    // Сохраняем основные параметры для передачи в downloadFile
+                    window.primaryParamsData = { ...params };
+                    
+                    // Загружаем график
+                    const response = await fetch('http://localhost:5238/api/SpeedCalcSelection/downloadpng', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(params)
+                    });
+                    
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const url = URL.createObjectURL(blob);
+                        
+                        graphImage.innerHTML = `<img src="${url}" alt="График" class="result-image">`;
+                        resultContainer.classList.remove('hidden');
+                        additionalParams.classList.remove('hidden');
+                        primaryParams.remove(); // Удаляем секцию ввода основных параметров
+                        
+                        // Прокручиваем к результатам
+                        resultContainer.scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                        const error = await response.text();
+                        alert(`Ошибка: ${error}`);
+                    }
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    alert('Не удалось построить график');
+                }
+            });
+            
+            // Обработка кнопки "Скачать техническое предложение"
+            downloadProposalBtn.addEventListener('click', async function() {
+                const formData = new FormData(form);
+                const params = {};
+                
+                // Собираем все данные формы (дополнительные параметры)
+                formData.forEach((value, key) => {
+                    if (value === '') {
+                        params[key] = null;
+                    } else if (form.elements[key].type === 'checkbox') {
+                        params[key] = form.elements[key].checked;
+                    } else if (!isNaN(value) && value !== '') {
+                        params[key] = Number(value);
+                    } else {
+                        params[key] = value;
+                    }
+                });
+                
+                // Объединяем с основными параметрами, которые были сохранены при построении графика
+                if (window.primaryParamsData) {
+                    Object.assign(params, window.primaryParamsData);
+                }
+                
+                // Логируем все параметры для отладки
+                console.log('Все параметры для скачивания:', params);
+                
+                try {
+                    const response = await fetch('http://localhost:5238/api/SpeedCalcSelection/downloadfile', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(params)
+                    });
+                    
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'Техническое_предложение.pdf';
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                    } else {
+                        const error = await response.text();
+                        alert(`Ошибка: ${error}`);
+                    }
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    alert('Не удалось скачать техническое предложение');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

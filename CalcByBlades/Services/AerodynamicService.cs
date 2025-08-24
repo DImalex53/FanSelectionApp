@@ -34,7 +34,7 @@ public class AerodynamicService(IAerodynamicsDataBladesRepository aerodynamicsDa
             NalichieVFD = parameters.NalichieVFD,
             TypeOfChoose = parameters.TypeOfChoose
         };
-            // Получаем данные о схеме для диаметра и оборотов
+        // Получаем данные о схеме для диаметра и оборотов
         var rightSchemes = PaintDiagramsHelper.GenerateTableOfRightSchemes(filteredData, parameters, new ParametersDrawImage());
         var aerodinamicByTypeBladesRow = filteredData.FirstOrDefault();
 
@@ -109,9 +109,9 @@ public class AerodynamicService(IAerodynamicsDataBladesRepository aerodynamicsDa
             {
 
             }
-        
+
         }
-           
+
         return graphs;
     }
 
@@ -188,7 +188,7 @@ public class AerodynamicService(IAerodynamicsDataBladesRepository aerodynamicsDa
 
         // Создаем PDF в памяти
         string tempPdfPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".pdf");
-        
+
         PdfExporter.ExportToPdf(
             aerodynamicPlot,
             torquePlot,
@@ -225,7 +225,7 @@ public class AerodynamicService(IAerodynamicsDataBladesRepository aerodynamicsDa
 
         // Читаем созданный файл и возвращаем его содержимое
         var fileBytes = await File.ReadAllBytesAsync(tempPdfPath);
-        
+
         // Удаляем временный файл
         if (File.Exists(tempPdfPath))
             File.Delete(tempPdfPath);

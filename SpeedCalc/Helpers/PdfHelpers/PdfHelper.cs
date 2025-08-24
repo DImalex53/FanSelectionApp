@@ -23,8 +23,6 @@ public static class PdfExporter
 
     private static void DrawHeader(XGraphics gfx, PdfPage page, PdfExportOptions options)
     {
-        try
-        {
             double pageWidth = page.Width.Point;
             double margin = 25;
             double headerHeight = 70;
@@ -68,17 +66,10 @@ public static class PdfExporter
             // Разделительная линия
             gfx.DrawLine(XPens.LightGray, margin, margin + headerHeight,
                         pageWidth - margin, margin + headerHeight);
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Ошибка в верхнем колонтитуле: {ex.Message}");
-        }
     }
 
     private static void DrawFooter(XGraphics gfx, PdfPage page, PdfExportOptions options)
     {
-        try
-        {
             double pageWidth = page.Width.Point;
             double pageHeight = page.Height.Point;
             double margin = 25;
@@ -122,11 +113,6 @@ public static class PdfExporter
             gfx.DrawString($"Страница {_pageCounter}", footerFont, XBrushes.Gray,
                 new XRect(0, pageHeight - 15, pageWidth - 15, 15),
                 XStringFormats.BottomRight);
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Ошибка в нижнем колонтитуле: {ex.Message}");
-        }
     }
 
     public static byte[] CreatePdfDocument(
@@ -141,8 +127,6 @@ public static class PdfExporter
         string tempAeroImagePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".png");
         string tempTorqueImagePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".png");
 
-        try
-        {
             aerodynamicPlot.Save(tempAeroImagePath, 800, 600);
             torquePlot.Save(tempTorqueImagePath, 800, 600);
 
@@ -669,13 +653,10 @@ public static class PdfExporter
             });
 
             document.Save(memoryStream, false);
-            return memoryStream.ToArray();
-        }
-        finally
-        {
-            try { File.Delete(tempAeroImagePath); } catch { }
-            try { File.Delete(tempTorqueImagePath); } catch { }
-        }
+            var bytes = memoryStream.ToArray();
+            if (File.Exists(tempAeroImagePath)) File.Delete(tempAeroImagePath);
+            if (File.Exists(tempTorqueImagePath)) File.Delete(tempTorqueImagePath);
+            return bytes;
     }
 
     private static void AddContentPage(PdfDocument document, PdfExportOptions options,

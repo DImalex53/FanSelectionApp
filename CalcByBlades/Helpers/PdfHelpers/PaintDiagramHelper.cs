@@ -91,7 +91,10 @@ public static class PaintDiagramHelper
             maxDeltaEfficiency,
             diameter,
             rpm);
-        var (flowRates1, pressureResistances) = CalculationDiagramHelper.GetPressureResistanceMassive(pointsCount, totalPressureWorkPoint.flowRate, parameters);           
+        double flowRateForResistance = double.IsNaN(totalPressureWorkPoint.flowRate)
+            ? parameters.FlowRateRequired
+            : totalPressureWorkPoint.flowRate;
+        var (flowRates1, pressureResistances) = CalculationDiagramHelper.GetPressureResistanceMassive(pointsCount, flowRateForResistance, parameters);           
 
         if (parameters.TypeOfPressure == 1)
         {
@@ -171,9 +174,12 @@ public static class PaintDiagramHelper
                 maxDeltaEfficiency,
                 diameter,
                 rpm);
+          double flowRateForResistanceStatic = double.IsNaN(staticPressureWorkPoint.flowRate)
+              ? parameters.FlowRateRequired
+              : staticPressureWorkPoint.flowRate;
           (flowRates1, pressureResistances) = CalculationDiagramHelper.GetPressureResistanceMassive(
               pointsCount, 
-              staticPressureWorkPoint.flowRate, 
+              flowRateForResistanceStatic, 
               parameters);
             var powerWorkPoint = CalculationDiagramHelper.GetPolinomPower(
                 staticPressureWorkPoint.flowRate,
@@ -241,8 +247,12 @@ public static class PaintDiagramHelper
             }
         }
 
-        double xMax = aerodynamicPlot.GetPlottables().Max(p => p.GetAxisLimits().Right);
-        double yMax = aerodynamicPlot.GetPlottables().Max(p => p.GetAxisLimits().Top);
+        var plottables = aerodynamicPlot.GetPlottables();
+        if (!plottables.Any())
+            return aerodynamicPlot;
+
+        double xMax = plottables.Max(p => p.GetAxisLimits().Right);
+        double yMax = plottables.Max(p => p.GetAxisLimits().Top);
         aerodynamicPlot.Axes.SetLimits(
             left: 0,
             right: xMax * 1.05,
@@ -474,18 +484,31 @@ public static class PaintDiagramHelper
         double minX = Math.Max(flowRates.Min(), flowRates1.Min());
         double maxX = Math.Min(flowRates.Max(), flowRates1.Max());
 
-        // Используем метод Брента для поиска пересечения
-        try
-        {
-            double intersectionX = MathNet.Numerics.RootFinding.Brent.FindRoot(diff, minX, maxX, 1e-5, 100);
-            double intersectionY = pressureCurve.Interpolate(intersectionX);
-            return (intersectionX, intersectionY);
-        }
-        catch
-        {
-            // Если пересечение не найдено
+        if (double.IsNaN(minX) || double.IsNaN(maxX) || maxX <= minX)
             return (double.NaN, double.NaN);
+
+        int samples = 200;
+        double step = (maxX - minX) / samples;
+        double xPrev = minX;
+        double fPrev = diff(xPrev);
+        if (fPrev == 0)
+            return (xPrev, pressureCurve.Interpolate(xPrev));
+
+        for (int i = 1; i <= samples; i++)
+        {
+            double xCurr = (i == samples) ? maxX : minX + i * step;
+            double fCurr = diff(xCurr);
+            if (fCurr == 0)
+                return (xCurr, pressureCurve.Interpolate(xCurr));
+            if (Math.Sign(fPrev) != Math.Sign(fCurr))
+            {
+                double rootX = MathNet.Numerics.RootFinding.Brent.FindRoot(diff, xPrev, xCurr, 1e-5, 100);
+                return (rootX, pressureCurve.Interpolate(rootX));
+            }
+            xPrev = xCurr;
+            fPrev = fCurr;
         }
+        return (double.NaN, double.NaN);
     }
 }
 

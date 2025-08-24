@@ -155,8 +155,6 @@ public static class PdfExporter
         if (parameters.SuctionType == 1)
         { numberOfBlades = numberOfBlades * 2; }
         DatasRightSchemes rowOfRightSchemes = AerodinamicHelper.GetRowOfRightSchemes(datas, parameters, parametersDrawImage);
-        try
-        {
             // Сохраняем графики с явным указанием формата
             aerodynamicPlot.Save(tempAeroImagePath, 800, 600);
             torquePlot.Save(tempTorqueImagePath, 800, 600);
@@ -766,17 +764,9 @@ public static class PdfExporter
             document.Save(pdfPath);
             Debug.WriteLine($"PDF успешно сохранен: {pdfPath}");
 
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Ошибка при создании PDF: {ex.Message}");
-            throw;
-        }
-        finally
-        {
-            try { File.Delete(tempAeroImagePath); } catch { }
-            try { File.Delete(tempTorqueImagePath); } catch { }
-        }
+            if (File.Exists(tempAeroImagePath)) File.Delete(tempAeroImagePath);
+            if (File.Exists(tempTorqueImagePath)) File.Delete(tempTorqueImagePath);
+        
     }
 
     private static void AddContentPage(PdfDocument document, PdfExportOptions options,
