@@ -7,4 +7,5 @@ public interface IAerodynamicService
 {
     public Task<byte[]> GenerateFileAsync(BladesCalculationParameters parameters);
     public Task<List<GraphData>> GetAllGraphsAsync(BladesCalculationParameters parameters);
+    public Task<List<string> GetAllSchemesAsync();
 }

@@ -311,6 +311,18 @@
                         <button type="button" id="showGraphBtn" class="btn" disabled>Построить график</button>
                     </div>
                 </form>
+                
+                <!-- Результаты для SpeedCalc -->
+                <div id="speedCalcResults" class="hidden">
+                    <h2 class="section-title">График быстроходности</h2>
+                    <div class="result-container">
+                        <img id="speedCalcImage" class="result-image" alt="График быстроходности">
+                    </div>
+                    <div class="download-section">
+                        <h3>Скачать техническое предложение</h3>
+                        <button type="button" id="downloadSpeedCalcBtn" class="btn secondary-btn">Скачать PDF</button>
+                    </div>
+                </div>
             </div>
             
             <!-- Вкладка "По типу лопаток" -->
@@ -407,6 +419,10 @@
             
             // Очищаем сообщения
             clearMessages();
+            
+            // Скрываем результаты
+            document.getElementById('speedCalcResults').classList.add('hidden');
+            document.getElementById('resultsContainer').classList.add('hidden');
         }
 
         // Очистка сообщений
@@ -446,6 +462,58 @@
             });
             
             document.getElementById('showResultsBtn').disabled = !allFilled;
+        });
+
+        // Обработка кнопки "Построить график" для SpeedCalc
+        document.getElementById('showGraphBtn').addEventListener('click', async function() {
+            const form = document.getElementById('speedcalcForm');
+            const formData = new FormData(form);
+            const params = {};
+            
+            // Собираем все данные формы
+            formData.forEach((value, key) => {
+                if (value === '') {
+                    params[key] = null;
+                } else if (form.elements[key].type === 'checkbox') {
+                    params[key] = form.elements[key].checked;
+                } else if (!isNaN(value) && value !== '') {
+                    params[key] = Number(value);
+                } else {
+                    params[key] = value;
+                }
+            });
+
+            try {
+                console.log('Отправка запроса на построение графика с параметрами:', params);
+                
+                // Получаем PNG изображение графика
+                const response = await fetch('http://localhost:5238/api/SpeedCalcSelection/downloadpng', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(params)
+                });
+
+                console.log('Статус ответа:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Ошибка сервера: ${response.status} - ${errorText}`);
+                }
+
+                // Получаем изображение как blob
+                const blob = await response.blob();
+                const imageUrl = URL.createObjectURL(blob);
+                
+                // Отображаем график
+                displaySpeedCalcGraph(imageUrl, params);
+                showMessage('График успешно построен', 'success');
+                
+            } catch (error) {
+                console.error('Ошибка при получении графика:', error);
+                showMessage(`Не удалось построить график: ${error.message}`);
+            }
         });
 
         // Обработка кнопки "Показать результаты" для BladesCalc
@@ -564,6 +632,21 @@
             });
         }
 
+        // Отображение графика для SpeedCalc
+        function displaySpeedCalcGraph(imageUrl, params) {
+            const imageElement = document.getElementById('speedCalcImage');
+            imageElement.src = imageUrl;
+            
+            // Показываем результаты
+            document.getElementById('speedCalcResults').classList.remove('hidden');
+            
+            // Сохраняем параметры для скачивания PDF
+            window.speedCalcParams = params;
+            
+            // Прокручиваем к результатам
+            document.getElementById('speedCalcResults').scrollIntoView({ behavior: 'smooth' });
+        }
+
         // Выбор графика
         function selectGraph(graphId) {
             selectedGraphId = graphId;
@@ -635,6 +718,42 @@
             }
         });
 
+        // Скачивание PDF для SpeedCalc
+        document.getElementById('downloadSpeedCalcBtn').addEventListener('click', async function() {
+            if (!window.speedCalcParams) {
+                showMessage('Ошибка: параметры для скачивания не найдены');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:5238/api/SpeedCalcSelection/downloadfile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(window.speedCalcParams)
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'SpeedCalc.pdf';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                } else {
+                    const error = await response.text();
+                    throw new Error(`Ошибка сервера: ${response.status} - ${error}`);
+                }
+            } catch (error) {
+                console.error('Ошибка при скачивании:', error);
+                showMessage(`Не удалось скачать техническое предложение: ${error.message}`);
+            }
+        });
+
         // Инициализация проверки полей при загрузке
         document.addEventListener('DOMContentLoaded', function() {
             // Триггерим событие input для проверки начального состояния
@@ -643,4 +762,648 @@
         });
     </script>
 </body>
+</html>
+
+                        </div>
+
+                        <div class="input-group">
+
+                            <label for="BladesSystemResistance" class="input-label">Давление (Па)</label>
+
+                            <input type="number" step="0.01" id="BladesSystemResistance" name="SystemResistance" value="6000" class="input-field" required>
+
+                        </div>
+
+                        <div class="input-group">
+
+                            <label for="BladesDensity" class="input-label">Плотность среды (кг/м³)</label>
+
+                            <input type="number" step="0.01" id="BladesDensity" name="Density" value="1.204" class="input-field" required>
+
+                        </div>
+
+                        <div class="input-group">
+
+                            <label for="SuctionTypeBlades" class="input-label">Тип всасывания</label>
+
+                            <select id="SuctionTypeBlades" name="SuctionType" class="select-field" required>
+
+                                <option value="0">Односторонний</option>
+
+                                <option value="1">Двусторонний</option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="input-group">
+
+                            <label for="TypeOfBladesKod" class="input-label">Тип лопаток</label>
+
+                            <select id="TypeOfBladesKod" name="TypeOfBladesKod" class="select-field" required>
+
+                                <option value="1">Назад загнутые</option>
+
+                                <option value="2">Радиально оканчивающиеся</option>
+
+                                <option value="3">Аэрофольные</option>
+
+                                <option value="4">Прямые, отклоенные назад</option>
+
+                                <option value="5">Вперед загнутые</option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="input-group">
+
+                            <label for="TypeOfPressure" class="input-label">Тип подбора</label>
+
+                            <select id="TypeOfPressure" name="TypeOfPressure" class="select-field" required>
+
+                                <option value="0">По статическому давлению</option>
+
+                                <option value="1">По полному давлению</option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                    
+
+                    <div class="text-center">
+
+                        <button type="button" id="showResultsBtn" class="btn" disabled>Показать результаты</button>
+
+                    </div>
+
+                </form>
+
+                
+
+                <!-- Индикатор загрузки -->
+
+                <div id="loading" class="loading">
+
+                    <div class="loading-spinner"></div>
+
+                    <p>Загрузка данных...</p>
+
+                </div>
+
+                
+
+                <!-- Сообщения об ошибках/успехе -->
+
+                <div id="messageContainer"></div>
+
+                
+
+                <!-- Результаты -->
+
+                <div id="resultsContainer" class="hidden">
+
+                    <h2 class="section-title">Результаты подбора</h2>
+
+                    <div id="graphsContainer" class="graphs-container">
+
+                        <!-- Графики будут добавлены динамически -->
+
+                    </div>
+
+                    
+
+                    <div class="download-section hidden" id="downloadSection">
+
+                        <h3>Выберите подходящий вариант и скачайте техническое предложение</h3>
+
+                        <button type="button" id="downloadProposalBtn" class="btn secondary-btn" disabled>Скачать техническое предложение</button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <script>
+
+        let selectedGraphId = null;
+
+        let allGraphsData = [];
+
+
+
+        // Переключение вкладок
+
+        function showTab(tabName) {
+
+            // Скрываем все вкладки
+
+            document.querySelectorAll('.tab-content').forEach(tab => {
+
+                tab.classList.remove('active');
+
+            });
+
+            document.querySelectorAll('.tab').forEach(tab => {
+
+                tab.classList.remove('active');
+
+            });
+
+            
+
+            // Показываем выбранную вкладку
+
+            document.getElementById(tabName).classList.add('active');
+
+            event.target.classList.add('active');
+
+            
+
+            // Очищаем сообщения
+
+            clearMessages();
+
+        }
+
+
+
+        // Очистка сообщений
+
+        function clearMessages() {
+
+            document.getElementById('messageContainer').innerHTML = '';
+
+        }
+
+
+
+        // Показать сообщение
+
+        function showMessage(text, type = 'error') {
+
+            const container = document.getElementById('messageContainer');
+
+            container.innerHTML = `<div class="${type === 'error' ? 'error-message' : 'success-message'}">${text}</div>`;
+
+        }
+
+
+
+        // Проверка заполнения полей для SpeedCalc
+
+        document.getElementById('speedcalcForm').addEventListener('input', function() {
+
+            const requiredFields = this.querySelectorAll('[required]');
+
+            let allFilled = true;
+
+            
+
+            requiredFields.forEach(field => {
+
+                if (!field.value) {
+
+                    allFilled = false;
+
+                }
+
+            });
+
+            
+
+            document.getElementById('showGraphBtn').disabled = !allFilled;
+
+        });
+
+
+
+        // Проверка заполнения полей для BladesCalc
+
+        document.getElementById('bladescalcForm').addEventListener('input', function() {
+
+            const requiredFields = this.querySelectorAll('[required]');
+
+            let allFilled = true;
+
+            
+
+            requiredFields.forEach(field => {
+
+                if (!field.value) {
+
+                    allFilled = false;
+
+                }
+
+            });
+
+            
+
+            document.getElementById('showResultsBtn').disabled = !allFilled;
+
+        });
+
+
+
+        // Обработка кнопки "Показать результаты" для BladesCalc
+
+        document.getElementById('showResultsBtn').addEventListener('click', async function() {
+
+            const form = document.getElementById('bladescalcForm');
+
+            const formData = new FormData(form);
+
+            const params = {};
+
+            
+
+            // Собираем все данные формы
+
+            formData.forEach((value, key) => {
+
+                if (value === '') {
+
+                    params[key] = null;
+
+                } else if (form.elements[key].type === 'checkbox') {
+
+                    params[key] = form.elements[key].checked;
+
+                } else if (!isNaN(value) && value !== '') {
+
+                    params[key] = Number(value);
+
+                } else {
+
+                    params[key] = value;
+
+                }
+
+            });
+
+
+
+            // Добавляем недостающие параметры
+
+            params.RightSchemeChoose = "Автоматический выбор";
+
+            params.NalichieVFD = 0;
+
+            params.TypeOfChoose = 0;
+
+
+
+            // Показываем индикатор загрузки
+
+            document.getElementById('loading').style.display = 'block';
+
+            document.getElementById('resultsContainer').classList.add('hidden');
+
+            clearMessages();
+
+
+
+            try {
+
+                console.log('Отправка запроса с параметрами:', params);
+
+                
+
+                // Получаем все графики
+
+                const response = await fetch('http://localhost:5000/api/Aerodynamics/getgraphs', {
+
+                    method: 'POST',
+
+                    headers: {
+
+                        'Content-Type': 'application/json',
+
+                    },
+
+                    body: JSON.stringify(params)
+
+                });
+
+
+
+                console.log('Статус ответа:', response.status);
+
+                
+
+                if (!response.ok) {
+
+                    const errorText = await response.text();
+
+                    throw new Error(`Ошибка сервера: ${response.status} - ${errorText}`);
+
+                }
+
+
+
+                const data = await response.json();
+
+                console.log('Получены данные:', data);
+
+                
+
+                if (!data || data.length === 0) {
+
+                    throw new Error('Нет данных для отображения');
+
+                }
+
+
+
+                allGraphsData = data;
+
+                displayGraphs(allGraphsData);
+
+                document.getElementById('resultsContainer').classList.remove('hidden');
+
+                document.getElementById('downloadSection').classList.remove('hidden');
+
+                showMessage('Данные успешно загружены', 'success');
+
+                
+
+                // Прокручиваем к результатам
+
+                document.getElementById('resultsContainer').scrollIntoView({ behavior: 'smooth' });
+
+                
+
+            } catch (error) {
+
+                console.error('Ошибка при получении данных:', error);
+
+                showMessage(`Не удалось получить результаты: ${error.message}`);
+
+            } finally {
+
+                // Скрываем индикатор загрузки
+
+                document.getElementById('loading').style.display = 'none';
+
+            }
+
+        });
+
+
+
+        // Отображение графиков
+
+        function displayGraphs(graphs) {
+
+            const container = document.getElementById('graphsContainer');
+
+            container.innerHTML = '';
+
+
+
+            graphs.forEach(graph => {
+
+                const graphCard = document.createElement('div');
+
+                graphCard.className = 'graph-card';
+
+                graphCard.dataset.graphId = graph.graphId;
+
+                graphCard.onclick = () => selectGraph(graph.graphId);
+
+
+
+                // Проверяем, является ли graphImage строкой base64
+
+                let imageUrl = '';
+
+                if (typeof graph.graphImage === 'string') {
+
+                    // Если это base64 строка
+
+                    if (graph.graphImage.startsWith('data:image')) {
+
+                        imageUrl = graph.graphImage;
+
+                    } else {
+
+                        // Предполагаем, что это base64 без префикса
+
+                        imageUrl = `data:image/png;base64,${graph.graphImage}`;
+
+                    }
+
+                } else {
+
+                    // Если это не строка, создаем URL из blob
+
+                    const imageBlob = new Blob([graph.graphImage], { type: 'image/png' });
+
+                    imageUrl = URL.createObjectURL(imageBlob);
+
+                }
+
+
+
+                graphCard.innerHTML = `
+
+                    <img src="${imageUrl}" alt="График" class="graph-image" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YzZjNmMyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjM1ZW0iIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiBmaWxsPSIjNjY2Ij5JbWFnZSBub3QgYXZhaWxhYmxlPC90ZXh0Pjwvc3ZnPg=='">
+
+                    <div class="graph-info">
+
+                        <div><strong>Название:</strong> ${graph.graphName || 'Не указано'}</div>
+
+                        <div><strong>КПД:</strong> ${graph.efficiency ? graph.efficiency.toFixed(2) + '%' : 'Не указано'}</div>
+
+                        <div><strong>Статическое давление:</strong> ${graph.staticPressure ? graph.staticPressure.toFixed(0) + ' Па' : 'Не указано'}</div>
+
+                        <div><strong>Диаметр:</strong> ${graph.diameter ? graph.diameter.toFixed(3) + ' м' : 'Не указано'}</div>
+
+                        <div><strong>Обороты:</strong> ${graph.rpm ? graph.rpm + ' об/мин' : 'Не указано'}</div>
+
+                        <div><strong>Марка вентилятора:</strong> ${graph.fanMark || 'Не указана'}</div>
+
+                    </div>
+
+                `;
+
+
+
+                container.appendChild(graphCard);
+
+            });
+
+        }
+
+
+
+        // Выбор графика
+
+        function selectGraph(graphId) {
+
+            selectedGraphId = graphId;
+
+            
+
+            // Убираем выделение со всех карточек
+
+            document.querySelectorAll('.graph-card').forEach(card => {
+
+                card.classList.remove('selected');
+
+            });
+
+            
+
+            // Выделяем выбранную карточку
+
+            document.querySelector(`.graph-card[data-graph-id="${graphId}"]`).classList.add('selected');
+
+            
+
+            // Активируем кнопку скачивания
+
+            document.getElementById('downloadProposalBtn').disabled = false;
+
+        }
+
+
+
+        // Скачивание технического предложения
+
+        document.getElementById('downloadProposalBtn').addEventListener('click', async function() {
+
+            if (!selectedGraphId) {
+
+                showMessage('Выберите график для скачивания технического предложения');
+
+                return;
+
+            }
+
+
+
+            const selectedGraph = allGraphsData.find(g => g.graphId === selectedGraphId);
+
+            if (!selectedGraph) {
+
+                showMessage('Ошибка: выбранный график не найден');
+
+                return;
+
+            }
+
+
+
+            // Создаем параметры для скачивания
+
+            const downloadParams = {
+
+                FlowRateRequired: parseFloat(document.getElementById('BladesFlowRateRequired').value),
+
+                SystemResistance: parseFloat(document.getElementById('BladesSystemResistance').value),
+
+                Density: parseFloat(document.getElementById('BladesDensity').value),
+
+                SuctionType: parseInt(document.getElementById('SuctionTypeBlades').value),
+
+                TypeOfBladesKod: parseInt(document.getElementById('TypeOfBladesKod').value),
+
+                TypeOfPressure: parseInt(document.getElementById('TypeOfPressure').value),
+
+                RightSchemeChoose: selectedGraph.graphName || "Автоматический выбор",
+
+                NalichieVFD: 0,
+
+                TypeOfChoose: 0
+
+            };
+
+
+
+            try {
+
+                const response = await fetch('http://localhost:5000/api/Aerodynamics/downloadfile', {
+
+                    method: 'POST',
+
+                    headers: {
+
+                        'Content-Type': 'application/json',
+
+                    },
+
+                    body: JSON.stringify(downloadParams)
+
+                });
+
+
+
+                if (response.ok) {
+
+                    const blob = await response.blob();
+
+                    const url = URL.createObjectURL(blob);
+
+                    const a = document.createElement('a');
+
+                    a.href = url;
+
+                    a.download = 'Техническое_предложение.pdf';
+
+                    document.body.appendChild(a);
+
+                    a.click();
+
+                    a.remove();
+
+                    URL.revokeObjectURL(url);
+
+                } else {
+
+                    const error = await response.text();
+
+                    throw new Error(`Ошибка сервера: ${response.status} - ${error}`);
+
+                }
+
+            } catch (error) {
+
+                console.error('Ошибка при скачивании:', error);
+
+                showMessage(`Не удалось скачать техническое предложение: ${error.message}`);
+
+            }
+
+        });
+
+
+
+        // Инициализация проверки полей при загрузке
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // Триггерим событие input для проверки начального состояния
+
+            document.getElementById('speedcalcForm').dispatchEvent(new Event('input'));
+
+            document.getElementById('bladescalcForm').dispatchEvent(new Event('input'));
+
+        });
+
+    </script>
+
+</body>
+
 </html>

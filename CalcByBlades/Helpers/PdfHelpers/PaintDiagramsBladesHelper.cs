@@ -47,7 +47,7 @@ public static class PaintDiagramsHelper
         var nameOfFan = parameters.SuctionType == 1 ? aerodynamicRow.NewMarkOfFand : aerodynamicRow.NewMarkOfFan;
 
         double diameter = MinDiameter;
-        int maxHalfPoluces = parameters.NalichieVFD == 1 ? 61 : 6;
+        int maxHalfPoluces = parameters.NalichieVFD == true ? 61 : 6;
         int minHalfPoluces = 1;
         int rpm;
         for (int k = 0; diameter < MaxDiameter; k++)

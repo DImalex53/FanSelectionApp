@@ -407,7 +407,7 @@ public static class PdfExporter
                 var markOfVzrivMotor = parameters.MarkOfVzrivMotor;
                 var VFD = "не предусмотрен";
                 var dopTrebovanyaMotor = parameters.DopTrebovaniyaMotor;
-                if (parameters.NalichieVFD == 1)
+                if (parameters.NalichieVFD == true)
                 {
                     VFD = "предусмотрен";
                 }

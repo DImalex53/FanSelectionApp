@@ -30,9 +30,7 @@ public class AerodynamicService(IAerodynamicsDataBladesRepository aerodynamicsDa
             SuctionType = parameters.SuctionType,
             TypeOfBladesKod = parameters.Type,
             TypeOfPressure = pressureType,
-            RightSchemeChoose = $"Автоматический подбор - Тип лопаток {bladeType}, Давление {(pressureType == 0 ? "Статическое" : "Полное")}",
             NalichieVFD = parameters.NalichieVFD,
-            TypeOfChoose = parameters.TypeOfChoose
         };
         // Получаем данные о схеме для диаметра и оборотов
         var rightSchemes = PaintDiagramsHelper.GenerateTableOfRightSchemes(filteredData, parameters, new ParametersDrawImage());
@@ -233,18 +231,10 @@ public class AerodynamicService(IAerodynamicsDataBladesRepository aerodynamicsDa
         return fileBytes;
     }
 
-    private static string GetBladeTypeName(int bladeType) => bladeType switch
+    public async Task<List<string>> GetAllSchemesAsync()
     {
-        1 => "Назад загнутые",
-        2 => "Радиально оканчивающиеся",
-        3 => "Аэрофольные",
-        4 => "Прямые, отклоенные назад",
-        5 => "Вперед загнутые",
-        _ => "Неизвестный тип"
-    };
+        var allData = (await _dataBladesRepository.GetAllAsync()).ToList();
 
-    public Task<byte[]> DownloadFileAsync(BladesCalculationParameters parameters)
-    {
-        throw new NotImplementedException();
+        return allData.Select(x => x.Scheme).ToList();
     }
 }

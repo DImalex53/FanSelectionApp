@@ -18,7 +18,7 @@ public static class AerodinamicHelper
     }
     public static DatasRightSchemes GetRowOfRightSchemes (List<AerodynamicsDataBlades> datas, BladesCalculationParameters parameters, ParametersDrawImage parametersDrawImage)
     {
-        return PaintDiagramsHelper.GenerateTableOfRightSchemes(datas, parameters, parametersDrawImage).FirstOrDefault(d => d.Scheme == parameters.RightSchemeChoose);
+        return PaintDiagramsHelper.GenerateTableOfRightSchemes(datas, parameters, parametersDrawImage).FirstOrDefault();
     }
     public static AerodynamicsDataBlades GetAerodynamicByTypeBladesRow (List<AerodynamicsDataBlades> datas, BladesCalculationParameters parameters)
     {

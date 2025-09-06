@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BladesCalc.Models;
 using BladesCalc.Services;
-using Common;
 
 namespace BladesCalc.Controllers;
 
@@ -10,6 +9,7 @@ namespace BladesCalc.Controllers;
 public class AerodynamicsController(IAerodynamicService calculationService) : ControllerBase
 {
     private readonly IAerodynamicService _service = calculationService;
+    
 
     [HttpPost("getgraphs")]
     public async Task<IActionResult> GetGraphs([FromBody] BladesCalculationParameters parameters)
@@ -46,5 +46,13 @@ public class AerodynamicsController(IAerodynamicService calculationService) : Co
         {
             return BadRequest($"Ошибка при генерации файла: {ex.Message}");
         }
+    }
+
+    [HttpGet("getallschemes")]
+    public async Task<IActionResult> GetAllSchemes()
+    {
+        var schemes = await _service.GetAllSchemesAsync();
+
+        return Ok(schemes);
     }
 }

@@ -7,6 +7,7 @@ public static class CalculationMomentOfInertciaHelper
 {
     private readonly static double Stock = 1.15;
     private readonly static double StockOfHub = 1.15;
+
     public static double GetMomentOfInertcia(
         List<AerodynamicsDataBlades> datas, 
         BladesCalculationParameters parameters, 
