@@ -609,7 +609,7 @@
             }
         });
 
-        // Отображение графиков - УБРАНО ОТОБРАЖЕНИЕ СХЕМЫ
+        // Отображение графиков - ИСПРАВЛЕННАЯ ВЕРСИЯ
         function displayGraphs(graphs) {
             const container = document.getElementById('graphsContainer');
             container.innerHTML = '';
@@ -644,7 +644,7 @@
                     console.log(`График ${index}: diagramAsImageBytes отсутствует`);
                 }
 
-                // Используем ТОЛЬКО необходимые поля из DatasRightVents - СХЕМА УБРАНА
+                // Используем ТОЛЬКО поля из DatasRightVents
                 graphCard.innerHTML = `
                     <img src="${imageUrl}" alt="Диаграмма вентилятора" class="graph-image" 
                          onerror="console.error('Ошибка загрузки изображения графика ${index}'); this.src='${getPlaceholderImage()}'">
@@ -652,6 +652,7 @@
                         <div><strong>Номер:</strong> ${graph.nomberOfVent || 'Не указан'}</div>
                         <div><strong>Диаметр:</strong> ${graph.diameter ? graph.diameter.toFixed(3) + ' м' : 'Не указано'}</div>
                         <div><strong>Обороты:</strong> ${graph.rpm ? graph.rpm + ' об/мин' : 'Не указано'}</div>
+                        <div><strong>Схема:</strong> ${graph.scheme || 'Не указана'}</div>
                         <div><strong>Марка:</strong> ${graph.newMarkOfFan || 'Не указана'}</div>
                     </div>
                 `;

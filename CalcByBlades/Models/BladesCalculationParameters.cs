@@ -13,4 +13,9 @@ public class BladesCalculationParameters : CalculationParameters
     /// Тип подбора (0 - по статическому давлению, 1 - по полному давлению)
     /// </summary>
     public int TypeOfPressure { get; set; } = 0;
+
+    /// <summary>
+    /// Номер выбранного графика
+    /// </summary> 
+    public int NumberOfGraph {  get; set; } = 0;
 }

@@ -106,7 +106,7 @@ public static class CalculationMomentOfInertciaHelper
         mainDiskThickness = 0;
         coverDiskThickness = 0;
 
-        DatasRightSchemes rowOfRightSchemes = AerodinamicHelper.GetRowOfRightSchemes(datas, parameters, parametersDrawImage);
+        DatasRightVents rowOfRightSchemes = AerodinamicHelper.GetRowOfRightVent(datas, parameters, parametersDrawImage);
 
         if (diameter <= 1.00 && rowOfRightSchemes.Rpm <= 1500)
         {

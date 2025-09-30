@@ -154,7 +154,7 @@ public static class PdfExporter
         
         if (parameters.SuctionType == 1)
         { numberOfBlades = numberOfBlades * 2; }
-        DatasRightSchemes rowOfRightSchemes = AerodinamicHelper.GetRowOfRightSchemes(datas, parameters, parametersDrawImage);
+        DatasRightVents rowOfRightSchemes = AerodinamicHelper.GetRowOfRightVent(datas, parameters, parametersDrawImage);
             // Сохраняем графики с явным указанием формата
             aerodynamicPlot.Save(tempAeroImagePath, 800, 600);
             torquePlot.Save(tempTorqueImagePath, 800, 600);

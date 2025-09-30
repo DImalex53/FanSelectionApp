@@ -7,26 +7,39 @@ public static class PaintDiagramsHelper
     private const double MinDiameter = 0.4;
     private const double MaxDiameter = 3;
 
-    public static List<DatasRightSchemes> GenerateTableOfRightSchemes(List<AerodynamicsDataBlades> aerodynamicsByTypeBlades, BladesCalculationParameters parameters, ParametersDrawImage parametersDrawImage)
+    public static List<DatasRightVents> GenerateTableOfRightVents
+        (
+        List<AerodynamicsDataBlades> aerodynamicsByTypeBlades, 
+        BladesCalculationParameters parameters, 
+        ParametersDrawImage parametersDrawImage
+        )
     {
-        var resultRightSchemes = new List<DatasRightSchemes>();
+        var resultRightVents = new List<DatasRightVents>();
+        int numberOfVent = 0;
 
         foreach (var aerodynamicRow in aerodynamicsByTypeBlades)
         {
-            var rightSchemes = GetRightSchemes(aerodynamicRow, parameters, parametersDrawImage);
+            var rightSchemes = GetRightVents(aerodynamicRow, parameters, parametersDrawImage, numberOfVent);
 
             if (rightSchemes.Any())
             {
-                resultRightSchemes.AddRange(rightSchemes);
+                resultRightVents.AddRange(rightSchemes);
             }
+            numberOfVent += rightSchemes.Count();
         }
 
-        return resultRightSchemes;
+        return resultRightVents;
     }
 
-    private static List<DatasRightSchemes> GetRightSchemes(AerodynamicsDataBlades aerodynamicRow, BladesCalculationParameters parameters, ParametersDrawImage parametersDrawImage)
+    private static List<DatasRightVents> GetRightVents
+        (
+        AerodynamicsDataBlades aerodynamicRow, 
+        BladesCalculationParameters parameters,
+        ParametersDrawImage parametersDrawImage,
+        int numberOfVent
+        )
     {
-        var result = new List<DatasRightSchemes>();
+        var result = new List<DatasRightVents>();
         var staticPressure1 = aerodynamicRow.StaticPressure1;
         var staticPressure2 = aerodynamicRow.StaticPressure2;
         var staticPressure3 = aerodynamicRow.StaticPressure3;
@@ -131,12 +144,15 @@ public static class PaintDiagramsHelper
                     height,
                     imageFormat);
 
-                result.Add(new DatasRightSchemes
+                numberOfVent++;
+                result.Add(new DatasRightVents
                 {
                     Diameter = diameter,
                     Rpm = rpm,
                     Scheme = aerodynamicRow.Scheme,
+                    NumberOfVent = numberOfVent,
                     DiagramAsImageBytes = aerodynamicPlotBytes,
+                    NewMarkOfFan = nameOfFan,
                 });
 
                 minHalfPoluces++;

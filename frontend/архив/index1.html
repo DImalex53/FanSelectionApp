@@ -409,33 +409,13 @@
     </div>
 
     <script>
-        let selectedGraphIndex = null;
+        let selectedGraphId = null;
         let allGraphsData = [];
         let speedCalcParams = null;
 
-        // Заглушка для изображения
-        function getPlaceholderImage() {
-            return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YzZjNmMyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjM1ZW0iIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiBmaWxsPSIjNjY2Ij5EaWFncmFtIG5vdCBhdmFpbGFibGU8L3RleHQ+PC9zdmc+';
-        }
-
-        // Отладочная функция для отслеживания загрузки изображений
-        function debugImageLoading() {
-            document.addEventListener('load', function(e) {
-                if (e.target.tagName === 'IMG' && e.target.classList.contains('graph-image')) {
-                    console.log('✅ Изображение успешно загружено');
-                }
-            }, true);
-
-            document.addEventListener('error', function(e) {
-                if (e.target.tagName === 'IMG' && e.target.classList.contains('graph-image')) {
-                    console.error('❌ Ошибка загрузки изображения');
-                    console.log('URL изображения:', e.target.src.substring(0, 100) + '...');
-                }
-            }, true);
-        }
-
         // Переключение вкладок
         function showTab(tabName) {
+            // Скрываем все вкладки
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
@@ -443,10 +423,14 @@
                 tab.classList.remove('active');
             });
             
+            // Показываем выбранную вкладку
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
             
+            // Очищаем сообщения
             clearMessages();
+            
+            // Скрываем результаты
             document.getElementById('speedCalcResults').classList.add('hidden');
             document.getElementById('resultsContainer').classList.add('hidden');
         }
@@ -468,7 +452,9 @@
             let allFilled = true;
             
             requiredFields.forEach(field => {
-                if (!field.value) allFilled = false;
+                if (!field.value) {
+                    allFilled = false;
+                }
             });
             
             document.getElementById('showGraphBtn').disabled = !allFilled;
@@ -480,7 +466,9 @@
             let allFilled = true;
             
             requiredFields.forEach(field => {
-                if (!field.value) allFilled = false;
+                if (!field.value) {
+                    allFilled = false;
+                }
             });
             
             document.getElementById('showResultsBtn').disabled = !allFilled;
@@ -492,6 +480,7 @@
             const formData = new FormData(form);
             const params = {};
             
+            // Собираем все данные формы
             formData.forEach((value, key) => {
                 if (value === '') {
                     params[key] = null;
@@ -505,6 +494,7 @@
             try {
                 console.log('Отправка запроса на построение графика с параметрами:', params);
                 
+                // Получаем PNG изображение графика
                 const response = await fetch('http://localhost:5238/api/SpeedCalcSelection/downloadpng', {
                     method: 'POST',
                     headers: {
@@ -520,9 +510,11 @@
                     throw new Error(`Ошибка сервера: ${response.status} - ${errorText}`);
                 }
 
+                // Получаем изображение как blob
                 const blob = await response.blob();
                 const imageUrl = URL.createObjectURL(blob);
                 
+                // Отображаем график
                 displaySpeedCalcGraph(imageUrl, params);
                 showMessage('График успешно построен', 'success');
                 
@@ -534,35 +526,42 @@
 
         // Обработка кнопки "Показать результаты" для BladesCalc
         document.getElementById('showResultsBtn').addEventListener('click', async function() {
+            const form = document.getElementById('bladescalcForm');
+            
+            // Создаем параметры для запроса с правильными типами данных
             const requestData = {
-                FlowRateRequired: parseFloat(document.getElementById('BladesFlowRateRequired').value),
-                SystemResistance: parseFloat(document.getElementById('BladesSystemResistance').value),
-                Density: parseFloat(document.getElementById('BladesDensity').value),
-                Type: parseInt(document.getElementById('TypeBlades').value),
-                SuctionType: parseInt(document.getElementById('SuctionTypeBlades').value),
-                TypeOfBladesKod: parseInt(document.getElementById('TypeOfBladesKod').value),
-                TypeOfPressure: parseInt(document.getElementById('TypeOfPressure').value),
-                RightSchemeChoose: "Автоматический выбор",
-                NalichieVFD: false,
-                TypeOfChoose: 0,
-                MotorVoltage: 380,
-                StartInletDensity: 1.204,
-                MaterialDensyti: 8000,
-                Vibroisolation: false,
-                GuideVane: false,
-                Teploisolation: false,
-                MaterialDesign: 5,
-                MaterialOfImpeller: "09Г2С",
-                MaterialOfUlita: "09Г2С",
-                MaterialOfRama: "09Г2С",
-                FlangeOutlet: false,
-                FlangeInlet: false,
-                ProjectName: "Изготовление и поставка тягодутьевой машины",
-                ShefMontage: false,
-                PuskoNaladka: false,
-                StudyOfPersonal: false
+                parameters: {
+                    FlowRateRequired: parseFloat(document.getElementById('BladesFlowRateRequired').value),
+                    SystemResistance: parseFloat(document.getElementById('BladesSystemResistance').value),
+                    Density: parseFloat(document.getElementById('BladesDensity').value),
+                    Type: parseInt(document.getElementById('TypeBlades').value),
+                    SuctionType: parseInt(document.getElementById('SuctionTypeBlades').value),
+                    TypeOfBladesKod: parseInt(document.getElementById('TypeOfBladesKod').value),
+                    TypeOfPressure: parseInt(document.getElementById('TypeOfPressure').value),
+                    RightSchemeChoose: "Автоматический выбор",
+                    NalichieVFD: false, // boolean вместо числа
+                    TypeOfChoose: 0,
+                    // Обязательные поля с значениями по умолчанию
+                    MotorVoltage: 380,
+                    StartInletDensity: 1.204,
+                    MaterialDensyti: 8000,
+                    Vibroisolation: false,
+                    GuideVane: false,
+                    Teploisolation: false,
+                    MaterialDesign: 5,
+                    MaterialOfImpeller: "09Г2С",
+                    MaterialOfUlita: "09Г2С",
+                    MaterialOfRama: "09Г2С",
+                    FlangeOutlet: false,
+                    FlangeInlet: false,
+                    ProjectName: "Изготовление и поставка тягодутьевой машины",
+                    ShefMontage: false,
+                    PuskoNaladka: false,
+                    StudyOfPersonal: false
+                }
             };
 
+            // Показываем индикатор загрузки
             document.getElementById('loading').style.display = 'block';
             document.getElementById('resultsContainer').classList.add('hidden');
             clearMessages();
@@ -570,11 +569,11 @@
             try {
                 console.log('Отправка запроса с параметрами:', requestData);
                 
-                const response = await fetch('http://localhost:5000/api/Aerodynamics/get-graphs', {
+                // Получаем все графики
+                const response = await fetch('http://localhost:5000/api/Aerodynamics/getgraphs', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
                     },
                     body: JSON.stringify(requestData)
                 });
@@ -583,7 +582,7 @@
                 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    throw new Error(`HTTP ошибка! статус: ${response.status} - ${errorText}`);
+                    throw new Error(`Ошибка сервера: ${response.status} - ${errorText}`);
                 }
 
                 const data = await response.json();
@@ -597,62 +596,56 @@
                 displayGraphs(allGraphsData);
                 document.getElementById('resultsContainer').classList.remove('hidden');
                 document.getElementById('downloadSection').classList.remove('hidden');
-                showMessage(`Найдено вариантов: ${data.length}`, 'success');
+                showMessage('Данные успешно загружены', 'success');
                 
+                // Прокручиваем к результатам
                 document.getElementById('resultsContainer').scrollIntoView({ behavior: 'smooth' });
                 
             } catch (error) {
                 console.error('Ошибка при получении данных:', error);
                 showMessage(`Не удалось получить результаты: ${error.message}`);
             } finally {
+                // Скрываем индикатор загрузки
                 document.getElementById('loading').style.display = 'none';
             }
         });
 
-        // Отображение графиков - УБРАНО ОТОБРАЖЕНИЕ СХЕМЫ
+        // Отображение графиков
         function displayGraphs(graphs) {
             const container = document.getElementById('graphsContainer');
             container.innerHTML = '';
 
-            if (!graphs || graphs.length === 0) {
-                container.innerHTML = '<div class="error-message">Нет графиков для отображения</div>';
-                return;
-            }
-
-            graphs.forEach((graph, index) => {
+            graphs.forEach(graph => {
                 const graphCard = document.createElement('div');
                 graphCard.className = 'graph-card';
-                graphCard.dataset.graphIndex = index;
-                graphCard.onclick = () => selectGraph(index);
+                graphCard.dataset.graphId = graph.graphId;
+                graphCard.onclick = () => selectGraph(graph.graphId);
 
-                // Обрабатываем изображение из diagramAsImageBytes
-                let imageUrl = getPlaceholderImage();
-                
-                if (graph.diagramAsImageBytes) {
-                    // diagramAsImageBytes УЖЕ является base64 строкой
-                    if (typeof graph.diagramAsImageBytes === 'string') {
-                        // Проверяем, есть ли уже префикс data:image
-                        if (graph.diagramAsImageBytes.startsWith('data:image/')) {
-                            imageUrl = graph.diagramAsImageBytes;
-                        } else {
-                            // Добавляем префикс для base64 строки
-                            imageUrl = `data:image/png;base64,${graph.diagramAsImageBytes}`;
-                        }
-                        console.log(`График ${index}: base64 строка обработана`);
+                // Проверяем, является ли graphImage строкой base64
+                let imageUrl = '';
+                if (typeof graph.graphImage === 'string') {
+                    // Если это base64 строка
+                    if (graph.graphImage.startsWith('data:image')) {
+                        imageUrl = graph.graphImage;
+                    } else {
+                        // Предполагаем, что это base64 без префикса
+                        imageUrl = `data:image/png;base64,${graph.graphImage}`;
                     }
                 } else {
-                    console.log(`График ${index}: diagramAsImageBytes отсутствует`);
+                    // Если это не строка, создаем URL из blob
+                    const imageBlob = new Blob([graph.graphImage], { type: 'image/png' });
+                    imageUrl = URL.createObjectURL(imageBlob);
                 }
 
-                // Используем ТОЛЬКО необходимые поля из DatasRightVents - СХЕМА УБРАНА
                 graphCard.innerHTML = `
-                    <img src="${imageUrl}" alt="Диаграмма вентилятора" class="graph-image" 
-                         onerror="console.error('Ошибка загрузки изображения графика ${index}'); this.src='${getPlaceholderImage()}'">
+                    <img src="${imageUrl}" alt="График" class="graph-image" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YzZjNmMyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjM1ZW0iIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiBmaWxsPSIjNjY2Ij5JbWFnZSBub3QgYXZhaWxhYmxlPC90ZXh0Pjwvc3ZnPg=='">
                     <div class="graph-info">
-                        <div><strong>Номер:</strong> ${graph.nomberOfVent || 'Не указан'}</div>
+                        <div><strong>Название:</strong> ${graph.graphName || 'Не указано'}</div>
+                        <div><strong>КПД:</strong> ${graph.efficiency ? graph.efficiency.toFixed(2) + '%' : 'Не указано'}</div>
+                        <div><strong>Статическое давление:</strong> ${graph.staticPressure ? graph.staticPressure.toFixed(0) + ' Па' : 'Не указано'}</div>
                         <div><strong>Диаметр:</strong> ${graph.diameter ? graph.diameter.toFixed(3) + ' м' : 'Не указано'}</div>
                         <div><strong>Обороты:</strong> ${graph.rpm ? graph.rpm + ' об/мин' : 'Не указано'}</div>
-                        <div><strong>Марка:</strong> ${graph.newMarkOfFan || 'Не указана'}</div>
+                        <div><strong>Марка вентилятора:</strong> ${graph.fanMark || 'Не указана'}</div>
                     </div>
                 `;
 
@@ -665,67 +658,80 @@
             const imageElement = document.getElementById('speedCalcImage');
             imageElement.src = imageUrl;
             
+            // Показываем результаты
             document.getElementById('speedCalcResults').classList.remove('hidden');
+            
+            // Сохраняем параметры для скачивания PDF
             speedCalcParams = params;
+            
+            // Прокручиваем к результатам
             document.getElementById('speedCalcResults').scrollIntoView({ behavior: 'smooth' });
         }
 
         // Выбор графика
-        function selectGraph(graphIndex) {
-            selectedGraphIndex = graphIndex;
+        function selectGraph(graphId) {
+            selectedGraphId = graphId;
             
+            // Убираем выделение со всех карточек
             document.querySelectorAll('.graph-card').forEach(card => {
                 card.classList.remove('selected');
             });
             
-            document.querySelector(`.graph-card[data-graph-index="${graphIndex}"]`).classList.add('selected');
+            // Выделяем выбранную карточку
+            document.querySelector(`.graph-card[data-graph-id="${graphId}"]`).classList.add('selected');
+            
+            // Активируем кнопку скачивания
             document.getElementById('downloadProposalBtn').disabled = false;
         }
 
         // Скачивание технического предложения для BladesCalc
         document.getElementById('downloadProposalBtn').addEventListener('click', async function() {
-            if (selectedGraphIndex === null) {
+            if (!selectedGraphId) {
                 showMessage('Выберите график для скачивания технического предложения');
                 return;
             }
 
-            const selectedGraph = allGraphsData[selectedGraphIndex];
+            const selectedGraph = allGraphsData.find(g => g.graphId === selectedGraphId);
             if (!selectedGraph) {
                 showMessage('Ошибка: выбранный график не найден');
                 return;
             }
 
+            // Создаем параметры для скачивания
             const downloadParams = {
-                FlowRateRequired: parseFloat(document.getElementById('BladesFlowRateRequired').value),
-                SystemResistance: parseFloat(document.getElementById('BladesSystemResistance').value),
-                Density: parseFloat(document.getElementById('BladesDensity').value),
-                Type: parseInt(document.getElementById('TypeBlades').value),
-                SuctionType: parseInt(document.getElementById('SuctionTypeBlades').value),
-                TypeOfBladesKod: parseInt(document.getElementById('TypeOfBladesKod').value),
-                TypeOfPressure: parseInt(document.getElementById('TypeOfPressure').value),
-                RightSchemeChoose: selectedGraph.newMarkOfFan || "Автоматический выбор",
-                NalichieVFD: false,
-                TypeOfChoose: 0,
-                MotorVoltage: 380,
-                StartInletDensity: 1.204,
-                MaterialDensyti: 8000,
-                Vibroisolation: false,
-                GuideVane: false,
-                Teploisolation: false,
-                MaterialDesign: 5,
-                MaterialOfImpeller: "09Г2С",
-                MaterialOfUlita: "09Г2С",
-                MaterialOfRama: "09Г2С",
-                FlangeOutlet: false,
-                FlangeInlet: false,
-                ProjectName: "Изготовление и поставка тягодутьевой машины",
-                ShefMontage: false,
-                PuskoNaladka: false,
-                StudyOfPersonal: false
+                parameters: {
+                    FlowRateRequired: parseFloat(document.getElementById('BladesFlowRateRequired').value),
+                    SystemResistance: parseFloat(document.getElementById('BladesSystemResistance').value),
+                    Density: parseFloat(document.getElementById('BladesDensity').value),
+                    Type: parseInt(document.getElementById('TypeBlades').value),
+                    SuctionType: parseInt(document.getElementById('SuctionTypeBlades').value),
+                    TypeOfBladesKod: parseInt(document.getElementById('TypeOfBladesKod').value),
+                    TypeOfPressure: parseInt(document.getElementById('TypeOfPressure').value),
+                    RightSchemeChoose: selectedGraph.graphName || "Автоматический выбор",
+                    NalichieVFD: false,
+                    TypeOfChoose: 0,
+                    // Обязательные поля с значениями по умолчанию
+                    MotorVoltage: 380,
+                    StartInletDensity: 1.204,
+                    MaterialDensyti: 8000,
+                    Vibroisolation: false,
+                    GuideVane: false,
+                    Teploisolation: false,
+                    MaterialDesign: 5,
+                    MaterialOfImpeller: "09Г2С",
+                    MaterialOfUlita: "09Г2С",
+                    MaterialOfRama: "09Г2С",
+                    FlangeOutlet: false,
+                    FlangeInlet: false,
+                    ProjectName: "Изготовление и поставка тягодутьевой машины",
+                    ShefMontage: false,
+                    PuskoNaladka: false,
+                    StudyOfPersonal: false
+                }
             };
 
             try {
-                const response = await fetch('http://localhost:5000/api/Aerodynamics/download-file', {
+                const response = await fetch('http://localhost:5000/api/Aerodynamics/downloadfile', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -738,7 +744,7 @@
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `Техническое_предложение_${selectedGraph.newMarkOfFan || 'вентилятор'}.pdf`;
+                    a.download = 'Техническое_предложение.pdf';
                     document.body.appendChild(a);
                     a.click();
                     a.remove();
@@ -789,9 +795,9 @@
             }
         });
 
-        // Инициализация
+        // Инициализация проверки полей при загрузке
         document.addEventListener('DOMContentLoaded', function() {
-            debugImageLoading();
+            // Триггерим событие input для проверки начального состояния
             document.getElementById('speedcalcForm').dispatchEvent(new Event('input'));
             document.getElementById('bladescalcForm').dispatchEvent(new Event('input'));
         });

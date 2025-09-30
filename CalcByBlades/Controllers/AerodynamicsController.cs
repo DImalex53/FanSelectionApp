@@ -9,9 +9,8 @@ namespace BladesCalc.Controllers;
 public class AerodynamicsController(IAerodynamicService calculationService) : ControllerBase
 {
     private readonly IAerodynamicService _service = calculationService;
-    
 
-    [HttpPost("getgraphs")]
+    [HttpPost("get-graphs")]
     public async Task<IActionResult> GetGraphs([FromBody] BladesCalculationParameters parameters)
     {
         if (parameters == null)
@@ -31,7 +30,7 @@ public class AerodynamicsController(IAerodynamicService calculationService) : Co
         }
     }
 
-    [HttpPost("downloadfile")]
+    [HttpPost("download-file")]
     public async Task<IActionResult> DownloadFile([FromBody] BladesCalculationParameters parameters)
     {
         if (parameters == null)
@@ -39,8 +38,9 @@ public class AerodynamicsController(IAerodynamicService calculationService) : Co
 
         try
         {
+            // Убрал параметр drawParameters, так как в сервисе он не используется
             var fileBytes = await _service.GenerateFileAsync(parameters);
-            return File(fileBytes, "application/pdf", "Техническое_предложение.pdf");
+            return File(fileBytes, "application/pdf", $"Техническое_предложение_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
         }
         catch (Exception ex)
         {
@@ -48,11 +48,17 @@ public class AerodynamicsController(IAerodynamicService calculationService) : Co
         }
     }
 
-    [HttpGet("getallschemes")]
+    [HttpGet("get-all-schemes")]
     public async Task<IActionResult> GetAllSchemes()
     {
-        var schemes = await _service.GetAllSchemesAsync();
-
-        return Ok(schemes);
+        try
+        {
+            var schemes = await _service.GetAllSchemesAsync();
+            return Ok(schemes);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Ошибка при получении схем: {ex.Message}");
+        }
     }
 }

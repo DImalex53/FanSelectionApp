@@ -20,7 +20,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -147,56 +147,89 @@
             background-color: #374151;
         }
 
+        .btn.confirm-btn {
+            background-color: #059669;
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+
+        .btn.confirm-btn:hover:not(:disabled) {
+            background-color: #047857;
+        }
+
         .hidden {
             display: none !important;
         }
 
         .graphs-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
             margin-top: 20px;
         }
 
         .graph-card {
             border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 25px;
             transition: all 0.3s ease;
             cursor: pointer;
+            background: white;
         }
 
         .graph-card:hover {
             border-color: #2563eb;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.15);
         }
 
         .graph-card.selected {
             border-color: #2563eb;
             background-color: #f0f7ff;
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.2);
         }
 
         .graph-image {
             width: 100%;
-            height: 250px;
+            height: 400px;
             object-fit: contain;
-            border-radius: 4px;
-            margin-bottom: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
             background-color: #f9fafb;
             border: 1px solid #e5e7eb;
         }
 
         .graph-info {
-            font-size: 14px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            font-size: 12px;
             color: #6b7280;
         }
 
-        .graph-info div {
-            margin-bottom: 5px;
+        .graph-info-item {
+            text-align: center;
+            padding: 8px;
+            background: #f8fafc;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
         }
 
         .graph-info strong {
             color: #374151;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .graph-info span {
+            font-size: 13px;
+            font-weight: 500;
+            color: #1f2937;
         }
 
         .section-title {
@@ -255,17 +288,77 @@
             border: 1px solid #bbf7d0;
         }
 
-        .speed-graph-container {
-            text-align: center;
-            margin: 20px 0;
+        .additional-params {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 30px;
+            border: 1px solid #e5e7eb;
         }
 
-        .speed-graph-image {
-            max-width: 100%;
-            height: auto;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
+        .additional-params h3 {
             margin-bottom: 20px;
+            color: #1f2937;
+            text-align: center;
+        }
+
+        .params-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .selected-graph-container {
+            background: #f0f7ff;
+            border: 2px solid #2563eb;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .selected-graph-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .selected-graph-image {
+            width: 100%;
+            height: 500px;
+            object-fit: contain;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .selected-graph-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .selected-info-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            text-align: center;
+        }
+
+        .selected-info-item strong {
+            display: block;
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .selected-info-item span {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
         }
     </style>
 </head>
@@ -324,24 +417,16 @@
                         <button type="button" id="showGraphBtn" class="btn" disabled>Построить график</button>
                     </div>
                 </form>
-
-                <!-- Индикатор загрузки для SpeedCalc -->
-                <div id="speedLoading" class="loading">
-                    <div class="loading-spinner"></div>
-                    <p>Построение графика...</p>
-                </div>
-
-                <!-- Сообщения для SpeedCalc -->
-                <div id="speedMessageContainer"></div>
-
-                <!-- График для SpeedCalc -->
-                <div id="speedGraphContainer" class="speed-graph-container hidden">
-                    <h2 class="section-title">Аэродинамическая характеристика</h2>
-                    <img id="speedGraphImage" class="speed-graph-image" alt="Аэродинамический график">
-                    
+                
+                <!-- Результаты для SpeedCalc -->
+                <div id="speedCalcResults" class="hidden">
+                    <h2 class="section-title">График быстроходности</h2>
+                    <div class="result-container">
+                        <img id="speedCalcImage" class="result-image" alt="График быстроходности">
+                    </div>
                     <div class="download-section">
-                        <h3>Сформировать техническое предложение</h3>
-                        <button type="button" id="downloadSpeedPdfBtn" class="btn secondary-btn">Скачать техническое предложение (PDF)</button>
+                        <h3>Скачать техническое предложение</h3>
+                        <button type="button" id="downloadSpeedCalcBtn" class="btn secondary-btn">Скачать PDF</button>
                     </div>
                 </div>
             </div>
@@ -363,6 +448,15 @@
                         <div class="input-group">
                             <label for="BladesDensity" class="input-label">Плотность среды (кг/м³)</label>
                             <input type="number" step="0.01" id="BladesDensity" name="Density" value="1.204" class="input-field" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="TypeBlades" class="input-label">Тип перемещаемой среды</label>
+                            <select id="TypeBlades" name="Type" class="select-field" required>
+                                <option value="1">Чистый воздух</option>
+                                <option value="2">Дымовой газ</option>
+                                <option value="3">С налипанием</option>
+                                <option value="4">Абразив</option>
+                            </select>
                         </div>
                         <div class="input-group">
                             <label for="SuctionTypeBlades" class="input-label">Тип всасывания</label>
@@ -395,25 +489,74 @@
                     </div>
                 </form>
                 
-                <!-- Индикатор загрузки для BladesCalc -->
+                <!-- Индикатор загрузки -->
                 <div id="loading" class="loading">
                     <div class="loading-spinner"></div>
                     <p>Загрузка данных...</p>
                 </div>
                 
-                <!-- Сообщения для BladesCalc -->
+                <!-- Сообщения об ошибках/успехе -->
                 <div id="messageContainer"></div>
                 
-                <!-- Результаты для BladesCalc -->
+                <!-- Результаты -->
                 <div id="resultsContainer" class="hidden">
                     <h2 class="section-title">Результаты подбора</h2>
                     <div id="graphsContainer" class="graphs-container">
                         <!-- Графики будут добавлены динамически -->
                     </div>
                     
-                    <div class="download-section hidden" id="downloadSection">
-                        <h3>Выберите подходящий вариант и скачайте техническое предложение</h3>
-                        <button type="button" id="downloadProposalBtn" class="btn secondary-btn" disabled>Скачать техническое предложение</button>
+                    <!-- Кнопка подтверждения выбора -->
+                    <button type="button" id="confirmSelectionBtn" class="btn confirm-btn hidden">Подтвердить выбор графика</button>
+                    
+                    <!-- Дополнительные параметры -->
+                    <div id="additionalParams" class="additional-params hidden">
+                        <h3>Дополнительные параметры</h3>
+                        <form id="additionalParamsForm">
+                            <div class="params-grid">
+                                <div class="input-group">
+                                    <label for="MotorVoltage" class="input-label">Напряжение сети, В</label>
+                                    <input type="number" step="0.01" id="MotorVoltage" name="MotorVoltage" value="380" class="input-field" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="StartInletDensity" class="input-label">Плотность среды во время пуска, кг/м³</label>
+                                    <input type="number" step="0.01" id="StartInletDensity" name="StartInletDensity" value="1.204" class="input-field" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="MaterialDensyti" class="input-label">Плотность материала изготовления, кг/м³</label>
+                                    <input type="number" step="0.01" id="MaterialDensyti" name="MaterialDensyti" value="8000" class="input-field" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="MaterialDesign" class="input-label">Материальное исполнение ТДМ</label>
+                                    <select id="MaterialDesign" name="MaterialDesign" class="select-field" required>
+                                        <option value="1">K1</option>
+                                        <option value="2">B</option>
+                                        <option value="3">BK1</option>
+                                        <option value="4">Ti</option>
+                                        <option value="5" selected>Стандарт</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label for="MaterialOfImpeller" class="input-label">Материал рабочего колеса</label>
+                                    <input type="text" id="MaterialOfImpeller" name="MaterialOfImpeller" value="09Г2С" class="input-field" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="MaterialOfUlita" class="input-label">Материал корпуса улиты</label>
+                                    <input type="text" id="MaterialOfUlita" name="MaterialOfUlita" value="09Г2С" class="input-field" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="MaterialOfRama" class="input-label">Материал рамы</label>
+                                    <input type="text" id="MaterialOfRama" name="MaterialOfRama" value="09Г2С" class="input-field" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="ProjectName" class="input-label">Название проекта</label>
+                                    <input type="text" id="ProjectName" name="ProjectName" value="Изготовление и поставка тягодутьевой машины" class="input-field" required>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <button type="button" id="downloadProposalBtn" class="btn secondary-btn" disabled>Скачать техническое предложение</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -421,19 +564,18 @@
     </div>
 
     <script>
-        // Конфигурация API endpoints
-        const API_CONFIG = {
-            speedCalc: 'http://localhost:5000/api/SpeedCalcSelection', // SpeedCalc проект
-            bladesCalc: 'http://localhost:5010/api/Aerodynamics'       // BladesCalc проект
-        };
-
-        let selectedGraphId = null;
+        let selectedGraphIndex = null;
         let allGraphsData = [];
-        let currentSpeedCalcParams = null;
+        let speedCalcParams = null;
+        let selectionConfirmed = false;
+
+        // Заглушка для изображения
+        function getPlaceholderImage() {
+            return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YzZjNmMyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjM1ZW0iIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiBmaWxsPSIjNjY2Ij5EaWFncmFtIG5vdCBhdmFpbGFibGU8L3RleHQ+PC9zdmc+';
+        }
 
         // Переключение вкладок
         function showTab(tabName) {
-            // Скрываем все вкладки
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
@@ -441,34 +583,32 @@
                 tab.classList.remove('active');
             });
             
-            // Показываем выбранную вкладку
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
             
-            // Очищаем сообщения
             clearMessages();
-            clearSpeedMessages();
+            document.getElementById('speedCalcResults').classList.add('hidden');
+            document.getElementById('resultsContainer').classList.add('hidden');
+            resetSelection();
         }
 
-        // Очистка сообщений для BladesCalc
+        // Сброс выбора
+        function resetSelection() {
+            selectedGraphIndex = null;
+            selectionConfirmed = false;
+            document.getElementById('confirmSelectionBtn').classList.add('hidden');
+            document.getElementById('additionalParams').classList.add('hidden');
+            document.getElementById('downloadProposalBtn').disabled = true;
+        }
+
+        // Очистка сообщений
         function clearMessages() {
             document.getElementById('messageContainer').innerHTML = '';
         }
 
-        // Очистка сообщений для SpeedCalc
-        function clearSpeedMessages() {
-            document.getElementById('speedMessageContainer').innerHTML = '';
-        }
-
-        // Показать сообщение для BladesCalc
+        // Показать сообщение
         function showMessage(text, type = 'error') {
             const container = document.getElementById('messageContainer');
-            container.innerHTML = `<div class="${type === 'error' ? 'error-message' : 'success-message'}">${text}</div>`;
-        }
-
-        // Показать сообщение для SpeedCalc
-        function showSpeedMessage(text, type = 'error') {
-            const container = document.getElementById('speedMessageContainer');
             container.innerHTML = `<div class="${type === 'error' ? 'error-message' : 'success-message'}">${text}</div>`;
         }
 
@@ -478,9 +618,7 @@
             let allFilled = true;
             
             requiredFields.forEach(field => {
-                if (!field.value) {
-                    allFilled = false;
-                }
+                if (!field.value) allFilled = false;
             });
             
             document.getElementById('showGraphBtn').disabled = !allFilled;
@@ -492,12 +630,22 @@
             let allFilled = true;
             
             requiredFields.forEach(field => {
-                if (!field.value) {
-                    allFilled = false;
-                }
+                if (!field.value) allFilled = false;
             });
             
             document.getElementById('showResultsBtn').disabled = !allFilled;
+        });
+
+        // Проверка заполнения дополнительных параметров
+        document.getElementById('additionalParamsForm').addEventListener('input', function() {
+            const requiredFields = this.querySelectorAll('[required]');
+            let allFilled = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value) allFilled = false;
+            });
+            
+            document.getElementById('downloadProposalBtn').disabled = !allFilled;
         });
 
         // Обработка кнопки "Построить график" для SpeedCalc
@@ -506,12 +654,9 @@
             const formData = new FormData(form);
             const params = {};
             
-            // Собираем все данные формы
             formData.forEach((value, key) => {
                 if (value === '') {
                     params[key] = null;
-                } else if (form.elements[key].type === 'checkbox') {
-                    params[key] = form.elements[key].checked;
                 } else if (!isNaN(value) && value !== '') {
                     params[key] = Number(value);
                 } else {
@@ -519,127 +664,10 @@
                 }
             });
 
-            // Сохраняем параметры для последующего использования при скачивании PDF
-            currentSpeedCalcParams = params;
-
-            // Показываем индикатор загрузки
-            document.getElementById('speedLoading').style.display = 'block';
-            document.getElementById('speedGraphContainer').classList.add('hidden');
-            clearSpeedMessages();
-
             try {
-                console.log('Отправка запроса в SpeedCalc для построения графика:', params);
+                console.log('Отправка запроса на построение графика с параметрами:', params);
                 
-                // Отправляем запрос в SpeedCalc проект для получения PNG
-                const response = await fetch(`${API_CONFIG.speedCalc}/downloadpng`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(params)
-                });
-
-                console.log('Статус ответа от SpeedCalc:', response.status);
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Ошибка сервера: ${response.status} - ${errorText}`);
-                }
-
-                // Получаем PNG изображение
-                const blob = await response.blob();
-                const imageUrl = URL.createObjectURL(blob);
-                
-                // Показываем график
-                document.getElementById('speedGraphImage').src = imageUrl;
-                document.getElementById('speedGraphContainer').classList.remove('hidden');
-                showSpeedMessage('График успешно построен', 'success');
-                
-                // Прокручиваем к графику
-                document.getElementById('speedGraphContainer').scrollIntoView({ behavior: 'smooth' });
-                
-            } catch (error) {
-                console.error('Ошибка при построении графика:', error);
-                showSpeedMessage(`Не удалось построить график: ${error.message}`);
-            } finally {
-                // Скрываем индикатор загрузки
-                document.getElementById('speedLoading').style.display = 'none';
-            }
-        });
-
-        // Обработка кнопки "Скачать техническое предложение" для SpeedCalc
-        document.getElementById('downloadSpeedPdfBtn').addEventListener('click', async function() {
-            if (!currentSpeedCalcParams) {
-                showSpeedMessage('Сначала постройте график');
-                return;
-            }
-
-            try {
-                console.log('Отправка запроса в SpeedCalc для скачивания PDF:', currentSpeedCalcParams);
-                
-                const response = await fetch(`${API_CONFIG.speedCalc}/downloadfile`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(currentSpeedCalcParams)
-                });
-
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'Техническое_предложение_SpeedCalc.pdf';
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    URL.revokeObjectURL(url);
-                    showSpeedMessage('Файл успешно скачан', 'success');
-                } else {
-                    const error = await response.text();
-                    throw new Error(`Ошибка сервера: ${response.status} - ${error}`);
-                }
-            } catch (error) {
-                console.error('Ошибка при скачивании PDF:', error);
-                showSpeedMessage(`Не удалось скачать техническое предложение: ${error.message}`);
-            }
-        });
-
-        // Обработка кнопки "Показать результаты" для BladesCalc
-        document.getElementById('showResultsBtn').addEventListener('click', async function() {
-            const form = document.getElementById('bladescalcForm');
-            const formData = new FormData(form);
-            const params = {};
-            
-            // Собираем все данные формы
-            formData.forEach((value, key) => {
-                if (value === '') {
-                    params[key] = null;
-                } else if (form.elements[key].type === 'checkbox') {
-                    params[key] = form.elements[key].checked;
-                } else if (!isNaN(value) && value !== '') {
-                    params[key] = Number(value);
-                } else {
-                    params[key] = value;
-                }
-            });
-
-            // Добавляем недостающие параметры
-            params.RightSchemeChoose = "Автоматический выбор";
-            params.NalichieVFD = 0;
-            params.TypeOfChoose = 0;
-
-            // Показываем индикатор загрузки
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('resultsContainer').classList.add('hidden');
-            clearMessages();
-
-            try {
-                console.log('Отправка запроса в BladesCalc с параметрами:', params);
-                
-                // Отправляем запрос в BladesCalc проект
-                const response = await fetch(`${API_CONFIG.bladesCalc}/getgraphs`, {
+                const response = await fetch('http://localhost:5238/api/SpeedCalcSelection/downloadpng', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -654,8 +682,75 @@
                     throw new Error(`Ошибка сервера: ${response.status} - ${errorText}`);
                 }
 
+                const blob = await response.blob();
+                const imageUrl = URL.createObjectURL(blob);
+                
+                displaySpeedCalcGraph(imageUrl, params);
+                showMessage('График успешно построен', 'success');
+                
+            } catch (error) {
+                console.error('Ошибка при получении графика:', error);
+                showMessage(`Не удалось построить график: ${error.message}`);
+            }
+        });
+
+        // Обработка кнопки "Показать результаты" для BladesCalc
+        document.getElementById('showResultsBtn').addEventListener('click', async function() {
+            const requestData = {
+                FlowRateRequired: parseFloat(document.getElementById('BladesFlowRateRequired').value),
+                SystemResistance: parseFloat(document.getElementById('BladesSystemResistance').value),
+                Density: parseFloat(document.getElementById('BladesDensity').value),
+                Type: parseInt(document.getElementById('TypeBlades').value),
+                SuctionType: parseInt(document.getElementById('SuctionTypeBlades').value),
+                TypeOfBladesKod: parseInt(document.getElementById('TypeOfBladesKod').value),
+                TypeOfPressure: parseInt(document.getElementById('TypeOfPressure').value),
+                RightSchemeChoose: "Автоматический выбор",
+                NalichieVFD: false,
+                TypeOfChoose: 0,
+                MotorVoltage: 380,
+                StartInletDensity: 1.204,
+                MaterialDensyti: 8000,
+                Vibroisolation: false,
+                GuideVane: false,
+                Teploisolation: false,
+                MaterialDesign: 5,
+                MaterialOfImpeller: "09Г2С",
+                MaterialOfUlita: "09Г2С",
+                MaterialOfRama: "09Г2С",
+                FlangeOutlet: false,
+                FlangeInlet: false,
+                ProjectName: "Изготовление и поставка тягодутьевой машины",
+                ShefMontage: false,
+                PuskoNaladka: false,
+                StudyOfPersonal: false
+            };
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultsContainer').classList.add('hidden');
+            clearMessages();
+            resetSelection();
+
+            try {
+                console.log('Отправка запроса с параметрами:', requestData);
+                
+                const response = await fetch('http://localhost:5000/api/Aerodynamics/get-graphs', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                console.log('Статус ответа:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ошибка! статус: ${response.status} - ${errorText}`);
+                }
+
                 const data = await response.json();
-                console.log('Получены данные от BladesCalc:', data);
+                console.log('Получены данные:', data);
                 
                 if (!data || data.length === 0) {
                     throw new Error('Нет данных для отображения');
@@ -664,57 +759,68 @@
                 allGraphsData = data;
                 displayGraphs(allGraphsData);
                 document.getElementById('resultsContainer').classList.remove('hidden');
-                document.getElementById('downloadSection').classList.remove('hidden');
-                showMessage('Данные успешно загружены из BladesCalc', 'success');
+                showMessage(`Найдено вариантов: ${data.length}`, 'success');
                 
-                // Прокручиваем к результатам
                 document.getElementById('resultsContainer').scrollIntoView({ behavior: 'smooth' });
                 
             } catch (error) {
-                console.error('Ошибка при получении данных от BladesCalc:', error);
+                console.error('Ошибка при получении данных:', error);
                 showMessage(`Не удалось получить результаты: ${error.message}`);
             } finally {
-                // Скрываем индикатор загрузки
                 document.getElementById('loading').style.display = 'none';
             }
         });
 
-        // Отображение графиков для BladesCalc
+        // Отображение графиков
         function displayGraphs(graphs) {
             const container = document.getElementById('graphsContainer');
             container.innerHTML = '';
 
-            graphs.forEach(graph => {
+            if (!graphs || graphs.length === 0) {
+                container.innerHTML = '<div class="error-message">Нет графиков для отображения</div>';
+                return;
+            }
+
+            graphs.forEach((graph, index) => {
                 const graphCard = document.createElement('div');
                 graphCard.className = 'graph-card';
-                graphCard.dataset.graphId = graph.graphId;
-                graphCard.onclick = () => selectGraph(graph.graphId);
+                graphCard.dataset.graphIndex = index;
+                graphCard.onclick = () => selectGraph(index);
 
-                // Проверяем, является ли graphImage строкой base64
-                let imageUrl = '';
-                if (typeof graph.graphImage === 'string') {
-                    // Если это base64 строка
-                    if (graph.graphImage.startsWith('data:image')) {
-                        imageUrl = graph.graphImage;
-                    } else {
-                        // Предполагаем, что это base64 без префикса
-                        imageUrl = `data:image/png;base64,${graph.graphImage}`;
+                // Обрабатываем изображение из diagramAsImageBytes
+                let imageUrl = getPlaceholderImage();
+                
+                if (graph.diagramAsImageBytes) {
+                    if (typeof graph.diagramAsImageBytes === 'string') {
+                        if (graph.diagramAsImageBytes.startsWith('data:image/')) {
+                            imageUrl = graph.diagramAsImageBytes;
+                        } else {
+                            imageUrl = `data:image/png;base64,${graph.diagramAsImageBytes}`;
+                        }
                     }
-                } else {
-                    // Если это не строка, создаем URL из blob
-                    const imageBlob = new Blob([graph.graphImage], { type: 'image/png' });
-                    imageUrl = URL.createObjectURL(imageBlob);
                 }
 
+                // Отображаем информацию в одну строку
                 graphCard.innerHTML = `
-                    <img src="${imageUrl}" alt="График" class="graph-image" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YzZjNmMyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjM1ZW0iIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiBmaWxsPSIjNjY2Ij5JbWFnZSBub3QgYXZhaWxhYmxlPC90ZXh0Pjwvc3ZnPg=='">
+                    <img src="${imageUrl}" alt="Диаграмма вентилятора" class="graph-image" 
+                         onerror="this.src='${getPlaceholderImage()}'">
                     <div class="graph-info">
-                        <div><strong>Название:</strong> ${graph.graphName || 'Не указано'}</div>
-                        <div><strong>КПД:</strong> ${graph.efficiency ? graph.efficiency.toFixed(2) + '%' : 'Не указано'}</div>
-                        <div><strong>Статическое давление:</strong> ${graph.staticPressure ? graph.staticPressure.toFixed(0) + ' Па' : 'Не указано'}</div>
-                        <div><strong>Диаметр:</strong> ${graph.diameter ? graph.diameter.toFixed(3) + ' м' : 'Не указано'}</div>
-                        <div><strong>Обороты:</strong> ${graph.rpm ? graph.rpm + ' об/мин' : 'Не указано'}</div>
-                        <div><strong>Марка вентилятора:</strong> ${graph.fanMark || 'Не указана'}</div>
+                        <div class="graph-info-item">
+                            <strong>Номер</strong>
+                            <span>${graph.nomberOfVent || 'Не указан'}</span>
+                        </div>
+                        <div class="graph-info-item">
+                            <strong>Диаметр</strong>
+                            <span>${graph.diameter ? graph.diameter.toFixed(3) + ' м' : 'Не указано'}</span>
+                        </div>
+                        <div class="graph-info-item">
+                            <strong>Обороты</strong>
+                            <span>${graph.rpm ? graph.rpm + ' об/мин' : 'Не указано'}</span>
+                        </div>
+                        <div class="graph-info-item">
+                            <strong>Марка</strong>
+                            <span>${graph.newMarkOfFan || 'Не указана'}</span>
+                        </div>
                     </div>
                 `;
 
@@ -722,52 +828,101 @@
             });
         }
 
-        // Выбор графика для BladesCalc
-        function selectGraph(graphId) {
-            selectedGraphId = graphId;
+        // Выбор графика
+        function selectGraph(graphIndex) {
+            if (selectionConfirmed) return;
             
-            // Убираем выделение со всех карточек
+            selectedGraphIndex = graphIndex;
+            
             document.querySelectorAll('.graph-card').forEach(card => {
                 card.classList.remove('selected');
             });
             
-            // Выделяем выбранную карточку
-            document.querySelector(`.graph-card[data-graph-id="${graphId}"]`).classList.add('selected');
-            
-            // Активируем кнопку скачивания
-            document.getElementById('downloadProposalBtn').disabled = false;
+            document.querySelector(`.graph-card[data-graph-index="${graphIndex}"]`).classList.add('selected');
+            document.getElementById('confirmSelectionBtn').classList.remove('hidden');
         }
+
+        // Подтверждение выбора
+        document.getElementById('confirmSelectionBtn').addEventListener('click', function() {
+            if (selectedGraphIndex === null) return;
+            
+            selectionConfirmed = true;
+            const selectedGraph = allGraphsData[selectedGraphIndex];
+            
+            // Скрываем все графики кроме выбранного
+            document.querySelectorAll('.graph-card').forEach((card, index) => {
+                if (index !== selectedGraphIndex) {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Показываем дополнительные параметры
+            document.getElementById('additionalParams').classList.remove('hidden');
+            document.getElementById('confirmSelectionBtn').classList.add('hidden');
+            
+            // Прокручиваем к дополнительным параметрам
+            document.getElementById('additionalParams').scrollIntoView({ behavior: 'smooth' });
+            
+            showMessage('График выбран. Заполните дополнительные параметры для скачивания технического предложения.', 'success');
+        });
 
         // Скачивание технического предложения для BladesCalc
         document.getElementById('downloadProposalBtn').addEventListener('click', async function() {
-            if (!selectedGraphId) {
+            if (selectedGraphIndex === null) {
                 showMessage('Выберите график для скачивания технического предложения');
                 return;
             }
 
-            const selectedGraph = allGraphsData.find(g => g.graphId === selectedGraphId);
+            const selectedGraph = allGraphsData[selectedGraphIndex];
             if (!selectedGraph) {
                 showMessage('Ошибка: выбранный график не найден');
                 return;
             }
 
-            // Создаем параметры для скачивания (отправляем в SpeedCalc проект)
-            const downloadParams = {
+            // Собираем основные параметры из формы
+            const mainParams = {
                 FlowRateRequired: parseFloat(document.getElementById('BladesFlowRateRequired').value),
                 SystemResistance: parseFloat(document.getElementById('BladesSystemResistance').value),
                 Density: parseFloat(document.getElementById('BladesDensity').value),
+                Type: parseInt(document.getElementById('TypeBlades').value),
                 SuctionType: parseInt(document.getElementById('SuctionTypeBlades').value),
                 TypeOfBladesKod: parseInt(document.getElementById('TypeOfBladesKod').value),
                 TypeOfPressure: parseInt(document.getElementById('TypeOfPressure').value),
-                RightSchemeChoose: selectedGraph.graphName || "Автоматический выбор",
-                NalichieVFD: 0,
+                NumberOfGraph: selectedGraphIndex + 1
+            };
+
+            // Собираем дополнительные параметры
+            const additionalParams = {
+                MotorVoltage: parseFloat(document.getElementById('MotorVoltage').value),
+                StartInletDensity: parseFloat(document.getElementById('StartInletDensity').value),
+                MaterialDensyti: parseFloat(document.getElementById('MaterialDensyti').value),
+                MaterialDesign: parseInt(document.getElementById('MaterialDesign').value),
+                MaterialOfImpeller: document.getElementById('MaterialOfImpeller').value,
+                MaterialOfUlita: document.getElementById('MaterialOfUlita').value,
+                MaterialOfRama: document.getElementById('MaterialOfRama').value,
+                ProjectName: document.getElementById('ProjectName').value,
+                // Остальные параметры по умолчанию
+                Vibroisolation: false,
+                GuideVane: false,
+                Teploisolation: false,
+                FlangeOutlet: false,
+                FlangeInlet: false,
+                NalichieVFD: false,
+                ShefMontage: false,
+                PuskoNaladka: false,
+                StudyOfPersonal: false
+            };
+
+            // Объединяем параметры
+            const downloadParams = {
+                ...mainParams,
+                ...additionalParams,
+                RightSchemeChoose: selectedGraph.newMarkOfFan || "Автоматический выбор",
                 TypeOfChoose: 0
             };
 
             try {
-                console.log('Отправка запроса в SpeedCalc для скачивания:', downloadParams);
-                
-                const response = await fetch(`${API_CONFIG.speedCalc}/downloadfile`, {
+                const response = await fetch('http://localhost:5000/api/Aerodynamics/download-file', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -780,12 +935,12 @@
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'Техническое_предложение_BladesCalc.pdf';
+                    a.download = `Техническое_предложение_${selectedGraph.newMarkOfFan || 'вентилятор'}.pdf`;
                     document.body.appendChild(a);
                     a.click();
                     a.remove();
                     URL.revokeObjectURL(url);
-                    showMessage('Файл успешно скачан', 'success');
+                    showMessage('Техническое предложение успешно скачано', 'success');
                 } else {
                     const error = await response.text();
                     throw new Error(`Ошибка сервера: ${response.status} - ${error}`);
@@ -796,9 +951,54 @@
             }
         });
 
-        // Инициализация проверки полей при загрузке
+        // Скачивание PDF для SpeedCalc
+        document.getElementById('downloadSpeedCalcBtn').addEventListener('click', async function() {
+            if (!speedCalcParams) {
+                showMessage('Ошибка: параметры для скачивания не найдены');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:5238/api/SpeedCalcSelection/downloadfile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(speedCalcParams)
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'SpeedCalc.pdf';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                } else {
+                    const error = await response.text();
+                    throw new Error(`Ошибка сервера: ${response.status} - ${error}`);
+                }
+            } catch (error) {
+                console.error('Ошибка при скачивании:', error);
+                showMessage(`Не удалось скачать техническое предложение: ${error.message}`);
+            }
+        });
+
+        // Отображение графика для SpeedCalc
+        function displaySpeedCalcGraph(imageUrl, params) {
+            const imageElement = document.getElementById('speedCalcImage');
+            imageElement.src = imageUrl;
+            
+            document.getElementById('speedCalcResults').classList.remove('hidden');
+            speedCalcParams = params;
+            document.getElementById('speedCalcResults').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Инициализация
         document.addEventListener('DOMContentLoaded', function() {
-            // Триггерим событие input для проверки начального состояния
             document.getElementById('speedcalcForm').dispatchEvent(new Event('input'));
             document.getElementById('bladescalcForm').dispatchEvent(new Event('input'));
         });
