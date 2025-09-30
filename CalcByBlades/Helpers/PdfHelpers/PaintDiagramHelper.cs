@@ -68,6 +68,8 @@ public static class PaintDiagramHelper
             diameter);
 
         Plot aerodynamicPlot = new();
+
+        // БАЗОВЫЕ НАСТРОЙКИ
         aerodynamicPlot.Title($"Вентилятор {nameOfFan}-{diameter * 10:F1}_{rpm} об/мин");
         aerodynamicPlot.XLabel("Расход воздуха, м³/ч");
         aerodynamicPlot.YLabel("Давление, Па");
@@ -77,21 +79,25 @@ public static class PaintDiagramHelper
         rightAxis.Label.Text = "Мощность, кВт";
         rightAxis.IsVisible = true;
 
-        // Добавляем основные графики
+        // ДОБАВЛЯЕМ ГРАФИКИ С ПОМОЩЬЮ Add.Scatter
         var staticPressurePlot = aerodynamicPlot.Add.Scatter(flowRates, staticPressures);
         staticPressurePlot.LegendText = "Статическое давление";
         staticPressurePlot.Color = Colors.Black;
-        staticPressurePlot.LineStyle = new LineStyle() { Pattern = LinePattern.Solid, Width = 1 };
+        staticPressurePlot.LineWidth = 2;
+        staticPressurePlot.MarkerSize = 0;
 
         var totalPressurePlot = aerodynamicPlot.Add.Scatter(flowRates, totalPressures);
         totalPressurePlot.LegendText = "Полное давление";
-        totalPressurePlot.Color = Colors.Black;
-        totalPressurePlot.LineStyle = new LineStyle() { Pattern = LinePattern.Solid, Width = 1 };
+        totalPressurePlot.Color = Colors.DarkGray;
+        totalPressurePlot.LineWidth = 2;
+        totalPressurePlot.MarkerSize = 0;
 
+        // График мощности на правой оси
         var powerPlot = aerodynamicPlot.Add.Scatter(flowRates, powers);
         powerPlot.LegendText = "Потребляемая мощность";
         powerPlot.Color = Colors.Orange;
-        powerPlot.LinePattern = LinePattern.Solid;
+        powerPlot.LineWidth = 2;
+        powerPlot.MarkerSize = 0;
         powerPlot.Axes.YAxis = rightAxis;
 
         // Добавляем характеристику сети
@@ -117,61 +123,52 @@ public static class PaintDiagramHelper
         var resistancePlot = aerodynamicPlot.Add.Scatter(flowRates1, pressureResistances);
         resistancePlot.LegendText = "Характеристика сети";
         resistancePlot.Color = Colors.Gray;
-        resistancePlot.LineStyle = new LineStyle() { Pattern = LinePattern.Solid, Width = 1 };
+        resistancePlot.LineWidth = 2;
+        resistancePlot.MarkerSize = 0;
 
-        // Добавляем рабочую точку в легенду (скрытый маркер)
-        var workPointPlot = aerodynamicPlot.Add.Marker(0, 0);
-        workPointPlot.LegendText = "Рабочая точка";
-        workPointPlot.Color = Colors.Red;
-        workPointPlot.MarkerSize = 8;
-        workPointPlot.MarkerShape = MarkerShape.FilledCircle;
-        workPointPlot.IsVisible = false;
-
-        // Создаем информационный текст
-        string infoText = $"Статическое давление: {staticPressures.Last():F1} Па\n" +
-                         $"Полное давление: {totalPressures.Last():F1} Па\n" +
-                         $"Расход: {flowRates.Last():F1} м³/ч\n" +
-                         $"Плотность на входе: {parameters.Density:F2} кг/м³";
-
-        // Добавляем информационный текст с фоном
-        double textX = flowRates.Max() * 0.75;
-        double textY = totalPressures.Max() * 0.8;
-        var Coordinate = new Coordinates(textX, textY);
-        var text = aerodynamicPlot.Add.Text(infoText, Coordinate);
-        text.LabelFontColor = Colors.DarkBlue;
-        text.LabelFontSize = 12;
-        text.LabelBold = true;
-        text.Alignment = Alignment.UpperLeft;
-        text.LabelBackgroundColor = Colors.LightGray;
-        text.LabelBorderColor = Colors.Gray;
-        text.LabelBorderWidth = 1;
-        text.LabelPadding = 5;
-
-        // Устанавливаем пределы осей
+        // РАСЧЕТ ПРАВИЛЬНЫХ ПРЕДЕЛОВ ОСЕЙ
         double xMin = 0;
-        double xMax = flowRates.Max() * 1.05;
+        double xMax = flowRates.Max() * 1.25; // Запас справа для информации
         double yMin = 0;
         double yMax = Math.Max(staticPressures.Max(), totalPressures.Max()) * 1.05;
 
         aerodynamicPlot.Axes.SetLimitsX(xMin, xMax);
         aerodynamicPlot.Axes.SetLimitsY(yMin, yMax);
 
-        // Настраиваем легенду
+        // ЛЕГЕНДА СПРАВА НАПРОТИВ НАЗВАНИЯ ПРАВОЙ ОСИ (ПОНИЖЕ)
         aerodynamicPlot.ShowLegend();
         var legend = aerodynamicPlot.Legend;
-        legend.Alignment = Alignment.UpperRight;
+        legend.Alignment = Alignment.MiddleRight; // По центру справа, напротив мощности
 
-        // Добавляем реальную рабочую точку на график
-        if (!double.IsNaN(totalPressureWorkPoint.flowRate) && !double.IsNaN(totalPressureWorkPoint.pressure))
-        {
-            AddWorkPointMarker(
-                aerodynamicPlot,
-                totalPressureWorkPoint.flowRate,
-                totalPressureWorkPoint.pressure,
-                "Рабочая точка");
-        }
+        // Добавляем отступ справа для информации
+        aerodynamicPlot.Axes.Margins(right: 0.3);
+
+        // ИНФОРМАЦИОННЫЙ БЛОК ПРЯМО ПОД ЛЕГЕНДОЙ
+        AddInfoBlockUnderLegend(aerodynamicPlot, parameters, staticPressures.Last(), totalPressures.Last(), flowRates.Last(), xMax, yMax);
 
         return aerodynamicPlot;
+    }
+
+    private static void AddInfoBlockUnderLegend(Plot plot, BladesCalculationParameters parameters, double staticPressure, double totalPressure, double flowRate, double xMax, double yMax)
+    {
+        // Создаем информационный блок
+        string infoText = $"Статическое давление: {staticPressure:F1} Па\n" +
+                         $"Полное давление: {totalPressure:F1} Па\n" +
+                         $"Расход: {flowRate:F1} м³/ч\n" +
+                         $"Плотность на входе: {parameters.Density:F2} кг/м³";
+
+        // Размещаем прямо под легендой с небольшим зазором
+        // Такое же положение по X как у легенды (справа с отступом)
+        double posX = xMax * 0.78; // Такое же положение как у легенды
+        double posY = yMax * 0.25; // Прямо под легендой с небольшим зазором
+
+        var text = plot.Add.Text(infoText, posX, posY);
+        text.Color = Colors.Black; // Черный цвет текста
+        text.FontSize = 11;
+        text.Alignment = Alignment.UpperLeft;
+        text.BackgroundColor = Colors.White; // Белый фон
+        text.BorderColor = Colors.Black; // Черная рамка
+        text.Padding = 5;
     }
 
     public static byte[] GetDiagramAsImageBytes(
@@ -218,9 +215,9 @@ public static class PaintDiagramHelper
 
         var format = imageFormat.ToLower() switch
         {
-            "png" => ScottPlot.ImageFormat.Png,
-            "jpeg" or "jpg" => ScottPlot.ImageFormat.Jpeg,
-            "bmp" => ScottPlot.ImageFormat.Bmp,
+            "png" => ImageFormat.Png,
+            "jpeg" or "jpg" => ImageFormat.Jpeg,
+            "bmp" => ImageFormat.Bmp,
             _ => throw new ArgumentException("Unsupported format")
         };
 
@@ -299,32 +296,18 @@ public static class PaintDiagramHelper
         nominalTorque.LegendText = "Момент при открытой заслонке";
         nominalTorque.Color = Colors.Grey;
         nominalTorque.LineWidth = 1;
+        nominalTorque.MarkerSize = 0;
 
         var torqueWithGatesPlot = torquePlot.Add.Scatter(rpmValues, torqueWithGates);
         torqueWithGatesPlot.LegendText = "Момент при закрытой заслонке на входе";
         torqueWithGatesPlot.Color = Colors.Black;
         torqueWithGatesPlot.LineWidth = 1;
+        torqueWithGatesPlot.MarkerSize = 0;
 
         torquePlot.ShowLegend();
         torquePlot.Legend.Alignment = Alignment.LowerRight;
 
         return torquePlot;
-    }
-
-    private static void AddWorkPointMarker(Plot aerodynamicPlot, double x, double y, string label)
-    {
-        var marker = aerodynamicPlot.Add.Marker(x, y);
-        marker.LegendText = label;
-        marker.Color = Colors.Red;
-        marker.MarkerSize = 10;
-        marker.MarkerShape = MarkerShape.FilledCircle;
-
-        // Добавляем текст рядом с маркером
-        var Coordinate = new Coordinates(x + x * 0.05, y + y * 0.05);
-        var text = aerodynamicPlot.Add.Text(label, Coordinate);
-        text.LabelFontColor = Colors.Red;
-        text.LabelFontSize = 10;
-        text.Alignment = Alignment.LowerLeft;
     }
 
     public static (double flowRate, double pressure) FindIntersectionPresurePoint(
