@@ -189,7 +189,7 @@ public static class PaintDiagramsHelper
                     NumberOfVent = numberOfVent,
                     DiagramAsImageBytes = aerodynamicPlotBytes,
                     NewMarkOfFan = nameOfFan,
-                    TotalEfficiency = totalEfficiency * 100,
+                    TotalEfficiency = totalEfficiency,
                 });
 
                 minHalfPoluces++;
