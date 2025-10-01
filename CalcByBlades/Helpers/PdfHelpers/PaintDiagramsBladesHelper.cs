@@ -94,6 +94,27 @@ public static class PaintDiagramsHelper
                         staticPressure3,
                         diameter);
 
+                var totalPressureWorkPoint = PaintDiagramHelper.FindIntersectionPresurePoint(
+                    parameters,
+                    staticPressure1,
+                    staticPressure2,
+                    staticPressure3,
+                    outletLength,
+                    outletWidth,
+                    minDeltaEfficiency,
+                    maxDeltaEfficiency,
+                    diameter,
+                    rpm);
+                var totalEfficiency = CalculationDiagramHelper.GetPolinomTotalEeficiency(
+                    totalPressureWorkPoint.flowRate, 
+                    parameters, 
+                    rpm, 
+                    efficiency1, 
+                    efficiency2, 
+                    efficiency3, 
+                    efficiency4, 
+                    diameter);
+
                 if (parameters.SystemResistance > pressure)
                 {
                     continue;
@@ -168,6 +189,7 @@ public static class PaintDiagramsHelper
                     NumberOfVent = numberOfVent,
                     DiagramAsImageBytes = aerodynamicPlotBytes,
                     NewMarkOfFan = nameOfFan,
+                    TotalEfficiency = totalEfficiency * 100,
                 });
 
                 minHalfPoluces++;

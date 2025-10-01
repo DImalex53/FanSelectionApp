@@ -148,7 +148,7 @@ public static class CalculationDiagramHelper
 
         return polinomPresureResistence;
     }
-    private static double GetPolinomStaticPressure(double flowRate, SpeedCalculationParameters parameters, List<AerodynamicsData> datas)
+    public static double GetPolinomStaticPressure(double flowRate, SpeedCalculationParameters parameters, List<AerodynamicsData> datas)
     {
         int Coefficient = 2;
         int SecondsInHour = 3600;

@@ -16,7 +16,6 @@ public class AerodynamicService(IAerodynamicsDataBladesRepository aerodynamicsDa
 
         var aerodinamicsByTypeBlades = AerodinamicHelper.GetAerodynamicByTypeBlades(allData, parameters);
 
-
         return PaintDiagramsHelper.GenerateTableOfRightVents(aerodinamicsByTypeBlades, parameters, new ParametersDrawImage());
     }
 
