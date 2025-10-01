@@ -82,13 +82,14 @@ public static class PaintDiagramHelper
         // ДОБАВЛЯЕМ ГРАФИКИ С ПОМОЩЬЮ Add.Scatter
         var staticPressurePlot = aerodynamicPlot.Add.Scatter(flowRates, staticPressures);
         staticPressurePlot.LegendText = "Статическое давление";
-        staticPressurePlot.Color = Colors.Black;
+        staticPressurePlot.Color = Colors.DarkGray;
         staticPressurePlot.LineWidth = 2;
         staticPressurePlot.MarkerSize = 0;
+        staticPressurePlot.LinePattern = LinePattern.Dotted;
 
         var totalPressurePlot = aerodynamicPlot.Add.Scatter(flowRates, totalPressures);
         totalPressurePlot.LegendText = "Полное давление";
-        totalPressurePlot.Color = Colors.DarkGray;
+        totalPressurePlot.Color = Colors.Black;
         totalPressurePlot.LineWidth = 2;
         totalPressurePlot.MarkerSize = 0;
 
@@ -122,53 +123,177 @@ public static class PaintDiagramHelper
 
         var resistancePlot = aerodynamicPlot.Add.Scatter(flowRates1, pressureResistances);
         resistancePlot.LegendText = "Характеристика сети";
-        resistancePlot.Color = Colors.Gray;
+        resistancePlot.Color = Colors.Blue;
         resistancePlot.LineWidth = 2;
         resistancePlot.MarkerSize = 0;
 
         // РАСЧЕТ ПРАВИЛЬНЫХ ПРЕДЕЛОВ ОСЕЙ
         double xMin = 0;
-        double xMax = flowRates.Max() * 1.25; // Запас справа для информации
+        double xMax = flowRates.Max() * 1.6; // Запас справа для информации
         double yMin = 0;
         double yMax = Math.Max(staticPressures.Max(), totalPressures.Max()) * 1.05;
 
-        aerodynamicPlot.Axes.SetLimitsX(xMin, xMax);
-        aerodynamicPlot.Axes.SetLimitsY(yMin, yMax);
+        var totalPressure = totalPressureWorkPoint.pressure;
 
+        var staticPressure = CalculationDiagramHelper.GetPolinomStaticPressure
+                (totalPressureWorkPoint.flowRate,
+                parameters,
+                rpm,
+                staticPressure1,
+                staticPressure2,
+                staticPressure3,
+                diameter);
+        var powerWorkPoint = CalculationDiagramHelper.GetPolinomPower(
+                totalPressureWorkPoint.flowRate,
+                parameters,
+                rpm,
+                staticPressure1,
+                staticPressure2,
+                staticPressure3,
+                outletLength,
+                outletWidth,
+                efficiency1,
+                efficiency2,
+                efficiency3,
+                efficiency4,
+                diameter);
+        var staticEfficiencyWorkPoint = CalculationDiagramHelper.GetPolinomStaticEficiency(
+                totalPressureWorkPoint.flowRate,
+                parameters,
+                rpm,
+                staticPressure1,
+                staticPressure2,
+                staticPressure3,
+                outletLength,
+                outletWidth,
+                efficiency1,
+                efficiency2,
+                efficiency3,
+                efficiency4,
+                diameter) * 100;
+        var totalEfficiencyWorkPoint = CalculationDiagramHelper.GetPolinomTotalEeficiency(
+                totalPressureWorkPoint.flowRate,
+                parameters,
+                rpm,
+                efficiency1,
+                efficiency2,
+                efficiency3,
+                efficiency4,
+                diameter) * 100;
+
+        if (parameters.TypeOfPressure == 0)
+        {
+            totalPressure = CalculationDiagramHelper.GetPolinomTotalPressure
+                (totalPressureWorkPoint.flowRate,
+                parameters,
+                rpm,
+                staticPressure1,
+                staticPressure2,
+                staticPressure3,
+                outletLength,
+                outletWidth,
+                diameter);
+            staticPressure = totalPressureWorkPoint.pressure;
+        }
+
+        var totalPressureMarker = aerodynamicPlot.Add.Marker(
+                totalPressureWorkPoint.flowRate,
+                totalPressure);
+        var staticPressureMarker = aerodynamicPlot.Add.Marker(
+                totalPressureWorkPoint.flowRate,
+                staticPressure);
+        var workPointRequiredMarker = aerodynamicPlot.Add.Marker(
+                parameters.FlowRateRequired,
+                parameters.SystemResistance);
+        var powerWorkPointMarker = aerodynamicPlot.Add.Marker(
+                totalPressureWorkPoint.flowRate,
+                powerWorkPoint);
+
+        //описание стилей маркеров рабочей точки
+        totalPressureMarker.Color = Colors.Red;
+        totalPressureMarker.Size = 5;
+        totalPressureMarker.Shape = MarkerShape.FilledCircle;
+        staticPressureMarker.Color = Colors.Red;
+        staticPressureMarker.Size = 5;
+        staticPressureMarker.Shape = MarkerShape.FilledCircle;
+        workPointRequiredMarker.Color = Colors.Red;
+        workPointRequiredMarker.Size = 5;
+        workPointRequiredMarker.Shape = MarkerShape.FilledCircle;
+        powerWorkPointMarker.Color = Colors.Red;
+        powerWorkPointMarker.Size = 5;
+        powerWorkPointMarker.Shape = MarkerShape.FilledCircle;
+        powerWorkPointMarker.Axes.YAxis = powerPlot.Axes.YAxis;
+        // Не добавляем в легенду, как требовалось
+        staticPressureMarker.LegendText = null;
+        totalPressureMarker.LegendText = null;
+        workPointRequiredMarker.LegendText = null;
+        powerWorkPointMarker.LegendText = null;
         // ЛЕГЕНДА СПРАВА НАПРОТИВ НАЗВАНИЯ ПРАВОЙ ОСИ (ПОНИЖЕ)
         aerodynamicPlot.ShowLegend();
         var legend = aerodynamicPlot.Legend;
-        legend.Alignment = Alignment.MiddleRight; // По центру справа, напротив мощности
+        legend.Alignment = Alignment.UpperRight; // Справа вверху
+        legend.FontSize = 14;
 
         // Добавляем отступ справа для информации
-        aerodynamicPlot.Axes.Margins(right: 0.3);
+        aerodynamicPlot.Axes.Margins(right: 0.6);
 
-        // ИНФОРМАЦИОННЫЙ БЛОК ПРЯМО ПОД ЛЕГЕНДОЙ
-        AddInfoBlockUnderLegend(aerodynamicPlot, parameters, staticPressures.Last(), totalPressures.Last(), flowRates.Last(), xMax, yMax);
+        // ИНФОРМАЦИОННЫЙ БЛОК ПОД ЛЕГЕНДОЙ
+        AddInfoBlockUnderLegend(
+            aerodynamicPlot, 
+            parameters, 
+            staticPressure, 
+            totalPressure, 
+            xMax, 
+            yMax,
+            totalPressureWorkPoint,
+            powerWorkPoint,
+            staticEfficiencyWorkPoint,
+            totalEfficiencyWorkPoint);
+
+        rightAxis.Max = powers.Max() * 1.1;
+        rightAxis.Min = 0;
+        aerodynamicPlot.Axes.SetLimits(xMin, xMax, yMin, yMax);
 
         return aerodynamicPlot;
     }
 
-    private static void AddInfoBlockUnderLegend(Plot plot, BladesCalculationParameters parameters, double staticPressure, double totalPressure, double flowRate, double xMax, double yMax)
+    private static void AddInfoBlockUnderLegend(
+        Plot plot, 
+        BladesCalculationParameters parameters, 
+        double staticPressure, 
+        double totalPressure,  
+        double xMax, 
+        double yMax, 
+        (double flowRate, double pressure) totalPressureWorkPoint,
+        double powerWorkPoint,
+        double staticEfficiencyWorkPoint,
+        double totalEfficiencyWorkPoint)
     {
         // Создаем информационный блок
-        string infoText = $"Статическое давление: {staticPressure:F1} Па\n" +
+        string infoText =$"Заданная точка:\n" +
+                         $"Расход: {parameters.FlowRateRequired:F1} м3/ч\n" +
+                         $"Давление: {parameters.SystemResistance:F1} Па\n" +
+                         $"Рабочая точка:\n" +
+                         $"Статическое давление: {staticPressure:F1} Па\n" +
+                         $"Статический КПД: {staticEfficiencyWorkPoint:F1} %\n" +
                          $"Полное давление: {totalPressure:F1} Па\n" +
-                         $"Расход: {flowRate:F1} м³/ч\n" +
+                         $"Полный КПД: {totalEfficiencyWorkPoint:F1} %\n" +
+                         $"Расход: {totalPressureWorkPoint.flowRate:F1} м³/ч\n" +
+                         $"Мощность: {powerWorkPoint:F1} кВт\n" +
                          $"Плотность на входе: {parameters.Density:F2} кг/м³";
 
         // Размещаем прямо под легендой с небольшим зазором
         // Такое же положение по X как у легенды (справа с отступом)
         double posX = xMax * 0.78; // Такое же положение как у легенды
-        double posY = yMax * 0.25; // Прямо под легендой с небольшим зазором
+        double posY = yMax * 0.5; // Прямо под легендой с небольшим зазором
 
         var text = plot.Add.Text(infoText, posX, posY);
-        text.Color = Colors.Black; // Черный цвет текста
-        text.FontSize = 11;
+        text.LabelFontColor = Colors.Black; // Черный цвет текста
+        text.LabelFontSize = 14;
         text.Alignment = Alignment.UpperLeft;
-        text.BackgroundColor = Colors.White; // Белый фон
-        text.BorderColor = Colors.Black; // Черная рамка
-        text.Padding = 5;
+        text.LabelBackgroundColor = Colors.White; // Белый фон
+        text.LabelBorderColor = Colors.Black; // Черная рамка
+        text.LabelPadding = 5;
     }
 
     public static byte[] GetDiagramAsImageBytes(
@@ -389,6 +514,7 @@ public static class PaintDiagramHelper
                 return (rootX, pressureCurve.Interpolate(rootX));
             }
             xPrev = xCurr;
+
             fPrev = fCurr;
         }
         return (double.NaN, double.NaN);

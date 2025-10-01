@@ -74,7 +74,7 @@ public static class PaintDiagramsHelper
 
                 rpm = MaxRPM / halfPoluces;
 
-                var pressure = parameters.TypeOfPressure == 0
+                var pressure = parameters.TypeOfPressure == 1
                     ? CalculationDiagramHelper.GetPolinomTotalPressure(
                         parameters.FlowRateRequired,
                         parameters,
@@ -119,6 +119,21 @@ public static class PaintDiagramsHelper
                     );
 
                 if (parameters.FlowRateRequired < flowRateMin)
+                {
+                    continue;
+                }
+
+                if (double.IsNaN(PaintDiagramHelper.FindIntersectionPresurePoint(
+                    parameters,
+                    staticPressure1,
+                    staticPressure2,
+                    staticPressure3,
+                    outletLength,
+                    outletWidth,
+                    minDeltaEfficiency,
+                    maxDeltaEfficiency,
+                    diameter,
+                    rpm).flowRate))
                 {
                     continue;
                 }
