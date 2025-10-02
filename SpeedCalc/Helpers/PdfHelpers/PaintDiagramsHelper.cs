@@ -1,4 +1,5 @@
-﻿using ScottPlot;
+﻿using iText.Layout.Renderer;
+using ScottPlot;
 using ScottPlot.AxisPanels;
 using SpeedCalc.Helpers.GetDiameterHelpers;
 using SpeedCalc.Models;
@@ -6,13 +7,13 @@ using SpeedCalc.Models;
 namespace SpeedCalc.Helpers.PdfHelpers;
 public class PaintDiagramsHelper
 {
-    private static readonly int PngWidth = 800;
-    private static readonly int PngHeight = 600;
 
-    public static byte[]? GenerateAerodynamicPng(List<AerodynamicsData> datas, SpeedCalculationParameters parameters)
+    private const int pointsCount = 100;
+
+    public static byte[]? GenerateAerodynamicPng(List<AerodynamicsData> datas, SpeedCalculationParameters parameters,ParametersDrawImage parametersDrawImage)
     {
         var plot = GenerateAerodynamicPlot(datas, parameters);
-        return plot.GetImageBytes(PngWidth, PngHeight);
+        return plot.GetImageBytes(parametersDrawImage.Width, parametersDrawImage.Height);
     }
 
     public static Plot? GenerateAerodynamicPlot(List<AerodynamicsData> datas, SpeedCalculationParameters parameters)
@@ -23,26 +24,27 @@ public class PaintDiagramsHelper
 
         var diameter = CalculationDiameterHelper.GetDiameter(datas, parameters);
 
+        var workPoint = PaintDiagramsHelper.FindIntersectionPresurePoint(parameters, datas);
+
         var (flowRates, staticPressures) = CalculationDiagramHelper.GetStaticPressureMassive(pointsCount, parameters, datas);
 
         var (_, totalPressures) = CalculationDiagramHelper.GetTotalPressureMassive(pointsCount, parameters, datas);
 
         var (_, powers) = CalculationDiagramHelper.GetPowerMassive(pointsCount, parameters, datas);
         var (flowRates1, pressureResistances) = CalculationDiagramHelper.GetPressureResistanceMassive(
-            pointsCount, parameters);
+            pointsCount, parameters, workPoint.flowRate);
 
-        var totalPressureWorkPoint = CalculationDiagramHelper.GetPolinomTotalPressure(parameters.FlowRateRequired,
+        var totalPressureWorkPoint = CalculationDiagramHelper.GetPolinomTotalPressure(workPoint.flowRate,
         datas, parameters);
 
-        var totalEficiencyWorkPoint = CalculationDiagramHelper.GetPolinomEeficiency(parameters.FlowRateRequired,
+        var totalEficiencyWorkPoint = CalculationDiagramHelper.GetPolinomEeficiency(workPoint.flowRate,
         datas, parameters);
 
-        var powerWorkPoint = CalculationDiagramHelper.GetPolinomPower(parameters.FlowRateRequired, datas, parameters);
+        var powerWorkPoint = CalculationDiagramHelper.GetPolinomPower(workPoint.flowRate, datas, parameters);
 
-        var staticPressureWorkPoint = CalculationDiagramHelper.GetPolinomStaticPressure(parameters.FlowRateRequired,
-        parameters, datas);
+        var staticPressureWorkPoint = workPoint.pressure;
 
-        var staticEficiencyWorkPoint = CalculationDiagramHelper.GetPolinomStaticEficiency(parameters.FlowRateRequired,
+        var staticEficiencyWorkPoint = CalculationDiagramHelper.GetPolinomStaticEficiency(workPoint.flowRate,
           datas, parameters);
 
         var markImpeller = aerodynamicRow.NewMarkOfFan;
@@ -96,6 +98,21 @@ public class PaintDiagramsHelper
             staticEficiencyWorkPoint,
             totalEficiencyWorkPoint);
 
+        aerodynamicPlot.Add.Marker(
+               workPoint.flowRate,
+               totalPressureWorkPoint, MarkerShape.FilledCircle, 5, Colors.Red);
+        aerodynamicPlot.Add.Marker(
+                workPoint.flowRate,
+                staticPressureWorkPoint, MarkerShape.FilledCircle, 5, Colors.Red);
+        aerodynamicPlot.Add.Marker(
+                parameters.FlowRateRequired,
+                parameters.SystemResistance, MarkerShape.FilledCircle, 5, Colors.Red);
+        var powerWorkPointMarker = aerodynamicPlot.Add.Marker(
+                workPoint.flowRate,
+                powerWorkPoint, MarkerShape.FilledCircle, 5, Colors.Red);
+
+        powerWorkPointMarker.Axes.YAxis = powerPlot.Axes.YAxis;
+
         powerPlot.Axes.YAxis.Max = powers.Max() * 1.1;
         powerPlot.Axes.YAxis.Min = 0;
         aerodynamicPlot.Axes.SetLimits(xMin, xMax, yMin, yMax);
@@ -132,7 +149,7 @@ public class PaintDiagramsHelper
 
         // Размещаем прямо под легендой с небольшим зазором
         // Такое же положение по X как у легенды (справа с отступом)
-        double posX = xMax * 0.78; // Такое же положение как у легенды
+        double posX = xMax * 0.75; // Такое же положение как у легенды
         double posY = yMax * 0.5; // Прямо под легендой с небольшим зазором
 
         var text = plot.Add.Text(infoText, posX, posY);
@@ -157,20 +174,85 @@ public class PaintDiagramsHelper
         torquePlot.XLabel("Обороты рабочего колеса, об/мин");
         torquePlot.Axes.Left.Label.Text = "Момент силы, кН*м";
 
-        var nominalTorquesPlot = torquePlot.Add.Scatter(rpmValues, nominalTorques, Colors.Grey);
+        var nominalTorquesPlot = torquePlot.Add.Scatter(rpmValues, nominalTorques, Colors.Black);
         nominalTorquesPlot.LegendText = "Момент при открытой заслонке";
+        nominalTorquesPlot.LineWidth = 1;
+        nominalTorquesPlot.MarkerSize = 0;
 
-        var torqueWithGatesPlot = torquePlot.Add.Scatter(rpmValues, torqueWithGates, Colors.Black);
+        var torqueWithGatesPlot = torquePlot.Add.Scatter(rpmValues, torqueWithGates, Colors.Grey);
         torqueWithGatesPlot.LegendText = "Момент при закрытой заслонке на входе";
+        torqueWithGatesPlot.LinePattern = LinePattern.Dashed;
+        torqueWithGatesPlot.LineWidth = 1;
+        torqueWithGatesPlot.MarkerSize = 0;
 
         torquePlot.ShowLegend();
-        torquePlot.Legend.Alignment = Alignment.LowerRight;
-        torqueWithGatesPlot.Axes.XAxis.Min = 0;
-        nominalTorquesPlot.Axes.YAxis.Min = 0;
+        torquePlot.Legend.Alignment = Alignment.UpperLeft;
+
+        double xMin = 0;
+        double xMax = rpmValues.Max() * 1.05; // Запас справа для информации
+        double yMin = 0;
+        double yMax = nominalTorques.Max() * 1.05;
+
+        torquePlot.Axes.SetLimits(xMin, xMax, yMin, yMax);
 
         return torquePlot;
     }
+    public static (double flowRate, double pressure) FindIntersectionPresurePoint(
+           SpeedCalculationParameters parameters,
+           List<AerodynamicsData> datas)
+    {
+        var flowRateMax1 = parameters.FlowRateRequired * 2;
+
+        var (flowRates, pressures) = CalculationDiagramHelper.GetStaticPressureMassive(
+        pointsCount,
+        parameters,
+        datas);
+
+        var (flowRates1, pressureResistances) = CalculationDiagramHelper.GetPressureResistanceMassive(
+            pointsCount,
+            parameters,
+            flowRateMax1);
+
+        // Интерполируем обе кривые для поиска пересечения
+        var pressureCurve = MathNet.Numerics.Interpolation.CubicSpline.InterpolateAkima(flowRates, pressures);
+        var resistanceCurve = MathNet.Numerics.Interpolation.CubicSpline.InterpolateAkima(flowRates1, pressureResistances);
+
+        // Функция для поиска корня (разницы между кривыми)
+        Func<double, double> diff = x => pressureCurve.Interpolate(x) - resistanceCurve.Interpolate(x);
+
+        // Находим диапазон, где может быть пересечение
+        double minX = Math.Max(flowRates.Min(), flowRates1.Min());
+        double maxX = Math.Min(flowRates.Max(), flowRates1.Max());
+
+        if (double.IsNaN(minX) || double.IsNaN(maxX) || maxX <= minX)
+            return (double.NaN, double.NaN);
+
+        int samples = 200;
+        double step = (maxX - minX) / samples;
+        double xPrev = minX;
+        double fPrev = diff(xPrev);
+        if (fPrev == 0)
+            return (xPrev, pressureCurve.Interpolate(xPrev));
+
+        for (int i = 1; i <= samples; i++)
+        {
+            double xCurr = (i == samples) ? maxX : minX + i * step;
+            double fCurr = diff(xCurr);
+            if (fCurr == 0)
+                return (xCurr, pressureCurve.Interpolate(xCurr));
+            if (Math.Sign(fPrev) != Math.Sign(fCurr))
+            {
+                double rootX = MathNet.Numerics.RootFinding.Brent.FindRoot(diff, xPrev, xCurr, 1e-5, 100);
+                return (rootX, pressureCurve.Interpolate(rootX));
+            }
+            xPrev = xCurr;
+
+            fPrev = fCurr;
+        }
+        return (double.NaN, double.NaN);
+    }
 }
+
 
 
 

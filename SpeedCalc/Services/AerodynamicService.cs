@@ -27,6 +27,7 @@ public class AerodynamicService(IAerodynamicsDataRepository aerodynamicsDataRepo
             aerodynamicPlot,
             torquePlot,
             parameters,
+            new ParametersDrawImage(),
             new PdfExportOptions
             {
                 Title = $"Отчет о подборе по задаче {parameters.NumberOfTask}",
@@ -40,7 +41,7 @@ public class AerodynamicService(IAerodynamicsDataRepository aerodynamicsDataRepo
     public async Task<byte[]> GeneratePngAsync(SpeedCalculationParameters parameters)
     {
         var allData = (await _aerodynamicsDataRepository.GetAllAsync()).ToList();
-        var png = PaintDiagramsHelper.GenerateAerodynamicPng(allData, parameters);
+        var png = PaintDiagramsHelper.GenerateAerodynamicPng(allData, parameters, new ParametersDrawImage());
 
         return png;
     }

@@ -10,9 +10,9 @@ public static class CalculationDiagramHelper
 {
     public static (double[] flowRates, double[] pressureResistances) GetPressureResistanceMassive(
         int pointsCount,
-        SpeedCalculationParameters parameters)
+        SpeedCalculationParameters parameters,
+        double flowRateMax)
     {
-        double flowRateMax = parameters.FlowRateRequired;
         double FlowRateMin = 0;
         double[] flowRates = Generate.LinearSpaced(pointsCount, FlowRateMin, flowRateMax);
         double[] pressureResistances = new double[pointsCount];

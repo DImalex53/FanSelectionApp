@@ -120,6 +120,7 @@ public static class PdfExporter
         Plot aerodynamicPlot,
         Plot torquePlot,
         SpeedCalculationParameters parameters,
+        ParametersDrawImage parametersDrawImage,
         PdfExportOptions? options = null)
     {
         options ??= new PdfExportOptions();
@@ -127,8 +128,8 @@ public static class PdfExporter
         string tempAeroImagePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".png");
         string tempTorqueImagePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".png");
 
-            aerodynamicPlot.Save(tempAeroImagePath, 800, 600);
-            torquePlot.Save(tempTorqueImagePath, 800, 600);
+            aerodynamicPlot.Save(tempAeroImagePath, parametersDrawImage.Width, parametersDrawImage.Height);
+            torquePlot.Save(tempTorqueImagePath, parametersDrawImage.Width, parametersDrawImage.Height);
 
             if (!File.Exists(tempAeroImagePath) || !File.Exists(tempTorqueImagePath))
             {

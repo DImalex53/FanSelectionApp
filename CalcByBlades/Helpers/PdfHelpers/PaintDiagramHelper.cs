@@ -196,38 +196,20 @@ public static class PaintDiagramHelper
             staticPressure = totalPressureWorkPoint.pressure;
         }
 
-        var totalPressureMarker = aerodynamicPlot.Add.Marker(
+        aerodynamicPlot.Add.Marker(
                 totalPressureWorkPoint.flowRate,
-                totalPressure);
-        var staticPressureMarker = aerodynamicPlot.Add.Marker(
+                totalPressure, MarkerShape.FilledCircle, 5, Colors.Red);
+        aerodynamicPlot.Add.Marker(
                 totalPressureWorkPoint.flowRate,
-                staticPressure);
-        var workPointRequiredMarker = aerodynamicPlot.Add.Marker(
+                staticPressure, MarkerShape.FilledCircle, 5, Colors.Red);
+        aerodynamicPlot.Add.Marker(
                 parameters.FlowRateRequired,
-                parameters.SystemResistance);
+                parameters.SystemResistance, MarkerShape.FilledCircle, 5, Colors.Red);
         var powerWorkPointMarker = aerodynamicPlot.Add.Marker(
                 totalPressureWorkPoint.flowRate,
-                powerWorkPoint);
+                powerWorkPoint, MarkerShape.FilledCircle, 5, Colors.Red);
 
-        //описание стилей маркеров рабочей точки
-        totalPressureMarker.Color = Colors.Red;
-        totalPressureMarker.Size = 5;
-        totalPressureMarker.Shape = MarkerShape.FilledCircle;
-        staticPressureMarker.Color = Colors.Red;
-        staticPressureMarker.Size = 5;
-        staticPressureMarker.Shape = MarkerShape.FilledCircle;
-        workPointRequiredMarker.Color = Colors.Red;
-        workPointRequiredMarker.Size = 5;
-        workPointRequiredMarker.Shape = MarkerShape.FilledCircle;
-        powerWorkPointMarker.Color = Colors.Red;
-        powerWorkPointMarker.Size = 5;
-        powerWorkPointMarker.Shape = MarkerShape.FilledCircle;
         powerWorkPointMarker.Axes.YAxis = powerPlot.Axes.YAxis;
-        // Не добавляем в легенду, как требовалось
-        staticPressureMarker.LegendText = null;
-        totalPressureMarker.LegendText = null;
-        workPointRequiredMarker.LegendText = null;
-        powerWorkPointMarker.LegendText = null;
         // ЛЕГЕНДА СПРАВА НАПРОТИВ НАЗВАНИЯ ПРАВОЙ ОСИ (ПОНИЖЕ)
         aerodynamicPlot.ShowLegend();
         var legend = aerodynamicPlot.Legend;
@@ -256,7 +238,7 @@ public static class PaintDiagramHelper
 
         return aerodynamicPlot;
     }
-
+   
     private static void AddInfoBlockUnderLegend(
         Plot plot, 
         BladesCalculationParameters parameters, 
@@ -419,18 +401,26 @@ public static class PaintDiagramHelper
 
         var nominalTorque = torquePlot.Add.Scatter(rpmValues, nominalTorques);
         nominalTorque.LegendText = "Момент при открытой заслонке";
-        nominalTorque.Color = Colors.Grey;
+        nominalTorque.Color = Colors.Black;
         nominalTorque.LineWidth = 1;
         nominalTorque.MarkerSize = 0;
 
         var torqueWithGatesPlot = torquePlot.Add.Scatter(rpmValues, torqueWithGates);
         torqueWithGatesPlot.LegendText = "Момент при закрытой заслонке на входе";
-        torqueWithGatesPlot.Color = Colors.Black;
+        torqueWithGatesPlot.Color = Colors.DarkGrey;
+        torqueWithGatesPlot.LinePattern = LinePattern.Dashed;
         torqueWithGatesPlot.LineWidth = 1;
         torqueWithGatesPlot.MarkerSize = 0;
 
         torquePlot.ShowLegend();
-        torquePlot.Legend.Alignment = Alignment.LowerRight;
+        torquePlot.Legend.Alignment = Alignment.UpperLeft;
+
+        double xMin = 0;
+        double xMax = rpmValues.Max() * 1.05; // Запас справа для информации
+        double yMin = 0;
+        double yMax = nominalTorques.Max() * 1.05;
+
+        torquePlot.Axes.SetLimits(xMin,xMax,yMin,yMax);
 
         return torquePlot;
     }

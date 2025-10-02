@@ -34,7 +34,10 @@ public static class CalculationDiameterHelper
             diameterStart = diameterNextItt1;
             diameter = diameterNextItt2;
         }
-
+        double t;
+        diameter = diameter * 10 - Math.Floor(diameter * 10) > 0.5 && diameter * 10 - Math.Floor(diameter * 10) != 0 ? 
+            Math.Ceiling(diameter * 10)/10 : (Math.Ceiling(diameter * 10) - 0.5)/10;
+        
         return diameter;
     }
     public static double GetSpeed(SpeedCalculationParameters parameters)
