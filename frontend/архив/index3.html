@@ -202,6 +202,7 @@
             border-color: #2563eb;
             background-color: #f0f7ff;
             box-shadow: 0 8px 25px rgba(37, 99, 235, 0.2);
+            grid-column: 2;
         }
 
         .graph-image {
@@ -420,48 +421,6 @@
         .close:hover {
             color: #ccc;
         }
-
-        /* Стили для кнопок сортировки */
-        .sort-btn {
-            position: relative;
-            padding-right: 35px;
-        }
-
-        .sort-btn.active {
-            background-color: #2563eb;
-        }
-
-        .sort-btn .arrow {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 14px;
-            color: white;
-        }
-
-        /* Центрирование графика для SpeedCalc */
-        .speedcalc-graph-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 20px 0;
-        }
-
-        .speedcalc-graph {
-            max-width: 600px;
-            width: 100%;
-            height: auto;
-        }
-
-        /* Кнопка отмены сортировки */
-        .btn.cancel-sort-btn {
-            background-color: #6b7280;
-        }
-
-        .btn.cancel-sort-btn:hover:not(:disabled) {
-            background-color: #4b5563;
-        }
     </style>
 </head>
 <body>
@@ -523,8 +482,8 @@
                 <!-- Результаты для SpeedCalc -->
                 <div id="speedCalcResults" class="hidden">
                     <h2 class="section-title">График быстроходности</h2>
-                    <div class="speedcalc-graph-container">
-                        <img id="speedCalcImage" class="speedcalc-graph" alt="График быстроходности">
+                    <div class="result-container">
+                        <img id="speedCalcImage" class="result-image" alt="График быстроходности">
                     </div>
                     <div class="download-section">
                         <h3>Скачать техническое предложение</h3>
@@ -577,13 +536,6 @@
                                     <option value="1">По полному давлению</option>
                                 </select>
                             </div>
-                            <div class="input-group">
-                                <label class="input-label">Наличие преобразователя частоты</label>
-                                <div class="checkbox-group">
-                                    <input type="checkbox" id="NalichieVFDInput" name="NalichieVFD">
-                                    <label for="NalichieVFDInput">Предусмотрен</label>
-                                </div>
-                            </div>
                         </div>
                         
                         <div class="text-center">
@@ -631,25 +583,15 @@
                                 <strong>Тип подбора</strong>
                                 <span id="fixedPressureType">По статическому давлению</span>
                             </div>
-                            <div class="param-item">
-                                <strong>Преобразователь частоты</strong>
-                                <span id="fixedNalichieVFD">Не предусмотрен</span>
-                            </div>
                         </div>
                     </div>
 
                     <div style="display: flex; justify-content: space-between; align-items: center; margin: 30px 0 20px;">
                         <h2 class="section-title" style="margin: 0;">Результаты подбора</h2>
                         <div style="display: flex; gap: 10px;">
-                            <button class="btn secondary-btn sort-btn" data-sort="diameter">
-                                Диаметр <span class="arrow">↑↓</span>
-                            </button>
-                            <button class="btn secondary-btn sort-btn" data-sort="efficiency">
-                                КПД <span class="arrow">↑↓</span>
-                            </button>
-                            <button class="btn cancel-sort-btn" id="cancelSortBtn">
-                                Отменить сортировку
-                            </button>
+                            <button class="btn secondary-btn sort-btn" data-sort="diameter">Диаметр ↑↓</button>
+                            <button class="btn secondary-btn sort-btn" data-sort="efficiency">КПД ↑↓</button>
+                            <button class="btn secondary-btn sort-btn" data-sort="both">Диаметр + КПД</button>
                         </div>
                     </div>
                     
@@ -672,10 +614,6 @@
                                 <div class="input-group">
                                     <label for="StartInletDensity" class="input-label">Плотность среды во время пуска, кг/м³</label>
                                     <input type="number" step="0.01" id="StartInletDensity" name="StartInletDensity" value="1.204" class="input-field" required>
-                                </div>
-                                <div class="input-group">
-                                    <label for="MaterialDensyti" class="input-label">Плотность материала РК, кг/м³</label>
-                                    <input type="number" step="0.01" id="MaterialDensyti" name="MaterialDensyti" value="8000" class="input-field" required>
                                 </div>
                                 <div class="input-group">
                                     <label for="MaterialDesign" class="input-label">Материальное исполнение ТДМ</label>
@@ -854,7 +792,6 @@
             field: null,
             direction: 'asc'
         };
-        let originalGraphsOrder = [];
 
         // Заглушка для изображения
         function getPlaceholderImage() {
@@ -875,54 +812,31 @@
             
             const pressureMap = {'0': 'По статическому давлению', '1': 'По полному давлению'};
             document.getElementById('fixedPressureType').textContent = pressureMap[document.getElementById('TypeOfPressure').value] || 'Не указан';
-            
-            const nalichieVFD = document.getElementById('NalichieVFDInput').checked ? 'Предусмотрен' : 'Не предусмотрен';
-            document.getElementById('fixedNalichieVFD').textContent = nalichieVFD;
-        }
-
-        // Функция обновления стрелок сортировки
-        function updateSortArrows() {
-            document.querySelectorAll('.sort-btn').forEach(btn => {
-                const arrow = btn.querySelector('.arrow');
-                const sortField = btn.dataset.sort;
-                
-                if (currentSort.field === sortField) {
-                    btn.classList.add('active');
-                    arrow.textContent = currentSort.direction === 'asc' ? '↑' : '↓';
-                } else {
-                    btn.classList.remove('active');
-                    arrow.textContent = '↑↓';
-                }
-            });
         }
 
         // Функция сортировки
         function sortGraphs(field) {
-            if (currentSort.field === field) {
-                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            if (field === 'both') {
+                allGraphsData.sort((a, b) => {
+                    const diameterDiff = b.diameter - a.diameter;
+                    if (Math.abs(diameterDiff) > 0.001) return diameterDiff;
+                    return b.totalEfficiency - a.totalEfficiency;
+                });
             } else {
-                currentSort.field = field;
-                currentSort.direction = 'asc';
+                if (currentSort.field === field) {
+                    currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSort.field = field;
+                    currentSort.direction = 'asc';
+                }
+                
+                allGraphsData.sort((a, b) => {
+                    const aVal = a[field === 'diameter' ? 'diameter' : 'totalEfficiency'];
+                    const bVal = b[field === 'diameter' ? 'diameter' : 'totalEfficiency'];
+                    return currentSort.direction === 'asc' ? aVal - bVal : bVal - aVal;
+                });
             }
             
-            allGraphsData.sort((a, b) => {
-                const aVal = a[field === 'diameter' ? 'diameter' : 'totalEfficiency'];
-                const bVal = b[field === 'diameter' ? 'diameter' : 'totalEfficiency'];
-                return currentSort.direction === 'asc' ? aVal - bVal : bVal - aVal;
-            });
-            
-            updateSortArrows();
-            displayGraphs(allGraphsData);
-        }
-
-        // Функция отмены сортировки
-        function cancelSort() {
-            if (originalGraphsOrder.length > 0) {
-                allGraphsData = [...originalGraphsOrder];
-            }
-            currentSort.field = null;
-            currentSort.direction = 'asc';
-            updateSortArrows();
             displayGraphs(allGraphsData);
         }
 
@@ -1095,7 +1009,7 @@
                 TypeOfBladesKod: parseInt(document.getElementById('TypeOfBladesKod').value),
                 TypeOfPressure: parseInt(document.getElementById('TypeOfPressure').value),
                 RightSchemeChoose: "Автоматический выбор",
-                NalichieVFD: document.getElementById('NalichieVFDInput').checked,
+                NalichieVFD: false,
                 TypeOfChoose: 0,
                 MotorVoltage: 380,
                 StartInletDensity: 1.204,
@@ -1145,10 +1059,6 @@
                 }
 
                 allGraphsData = data;
-                originalGraphsOrder = [...data]; // Сохраняем оригинальный порядок
-                currentSort.field = null;
-                currentSort.direction = 'asc';
-                updateSortArrows();
                 displayGraphs(allGraphsData);
                 
                 // Скрываем форму ввода и показываем результаты
@@ -1180,9 +1090,6 @@
             graphs.forEach((graph, index) => {
                 const graphCard = document.createElement('div');
                 graphCard.className = 'graph-card';
-                if (index === selectedGraphIndex) {
-                    graphCard.classList.add('selected');
-                }
                 graphCard.dataset.graphIndex = index;
                 
                 let imageUrl = getPlaceholderImage();
@@ -1252,10 +1159,10 @@
             
             selectionConfirmed = true;
             
-            // НЕ скрываем другие графики, только подсвечиваем выбранный
+            // Скрываем все графики кроме выбранного и центрируем
             document.querySelectorAll('.graph-card').forEach((card, index) => {
                 if (index !== selectedGraphIndex) {
-                    card.classList.remove('selected');
+                    card.style.display = 'none';
                 } else {
                     card.classList.add('selected');
                 }
@@ -1274,9 +1181,6 @@
                 sortGraphs(this.dataset.sort);
             });
         });
-
-        // Обработчик кнопки отмены сортировки
-        document.getElementById('cancelSortBtn').addEventListener('click', cancelSort);
 
         // Скачивание технического предложения для BladesCalc
         document.getElementById('downloadProposalBtn').addEventListener('click', async function() {
@@ -1306,7 +1210,6 @@
             const additionalParams = {
                 MotorVoltage: parseFloat(document.getElementById('MotorVoltage').value),
                 StartInletDensity: parseFloat(document.getElementById('StartInletDensity').value),
-                MaterialDensyti: parseFloat(document.getElementById('MaterialDensyti').value),
                 MaterialDesign: parseInt(document.getElementById('MaterialDesign').value),
                 MaterialOfImpeller: document.getElementById('MaterialOfImpeller').value,
                 MaterialOfUlita: document.getElementById('MaterialOfUlita').value,
@@ -1326,6 +1229,7 @@
                 PuskoNaladka: document.getElementById('PuskoNaladka').checked,
                 StudyOfPersonal: document.getElementById('StudyOfPersonal').checked,
                 // Остальные текстовые поля
+                MaterialDensyti: 8000,
                 MuftType: document.getElementById('MuftType').value || null,
                 TypeOfPPO: document.getElementById('TypeOfPPO').value || null,
                 Klimatic: document.getElementById('Klimatic').value || null,
@@ -1398,54 +1302,13 @@
                 return;
             }
 
-            // Собираем все параметры для SpeedCalc согласно классу CalculationParameters
-            const speedCalcDownloadParams = {
-                ...speedCalcParams,
-                MotorVoltage: 380,
-                StartInletDensity: 1.204,
-                MaterialDensyti: 8000,
-                NumberOfTask: null,
-                ConstructScheme: null,
-                RotaitionDirection: 0,
-                ExhaustDirection: null,
-                Vibroisolation: false,
-                GuideVane: false,
-                Teploisolation: false,
-                MaterialDesign: 5,
-                MaterialOfImpeller: "09Г2С",
-                MaterialOfUlita: "09Г2С",
-                MaterialOfBoltsOfUlita: null,
-                MaterialOfRama: "09Г2С",
-                MuftType: null,
-                TypeOfPPO: null,
-                Klimatic: null,
-                DopTrebovaniyaMotor: null,
-                ShaftSeal: null,
-                TypeOfCompensatorInlet: null,
-                TypeOfCompensatorOutlet: null,
-                FlangeOutlet: false,
-                FlangeInlet: false,
-                VibroSensorPPO: null,
-                TempSensorPPO: null,
-                VibroSensorMotor: null,
-                MarkOfVzrivMotor: null,
-                NalichieVFD: false,
-                ProjectName: "Изготовление и поставка тягодутьевой машины",
-                DopKomplekt: null,
-                DopTrebovanyaTDM: null,
-                Zip: null,
-                ShefMontage: false,
-                PuskoNaladka: false,
-                StudyOfPersonal: false
-            };
-
             try {
                 const response = await fetch('http://localhost:5238/api/SpeedCalcSelection/downloadfile', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(speedCalcDownloadParams)
+                    body: JSON.stringify(speedCalcParams)
                 });
 
                 if (response.ok) {
@@ -1458,7 +1321,6 @@
                     a.click();
                     a.remove();
                     URL.revokeObjectURL(url);
-                    showMessage('Техническое предложение успешно скачано', 'success');
                 } else {
                     const error = await response.text();
                     throw new Error(`Ошибка сервера: ${response.status} - ${error}`);
@@ -1484,7 +1346,6 @@
             document.getElementById('speedcalcForm').dispatchEvent(new Event('input'));
             document.getElementById('bladescalcForm').dispatchEvent(new Event('input'));
             updateFixedParams();
-            updateSortArrows();
         });
     </script>
 </body>

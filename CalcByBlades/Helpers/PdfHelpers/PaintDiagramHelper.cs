@@ -4,7 +4,7 @@ using BladesCalc.Models;
 namespace BladesCalc.Helpers.PdfHelpers;
 public static class PaintDiagramHelper
 {
-    private const int pointsCount = 100;
+    private const int PointsCount = 50;
 
     public static Plot GetDiagrameDraw(
      BladesCalculationParameters parameters,
@@ -27,7 +27,7 @@ public static class PaintDiagramHelper
         var nameOfFan = parameters.SuctionType == 1 ? newMarkOfFand : newMarkOfFan;
 
         var (flowRates, staticPressures) = CalculationDiagramHelper.GetStaticPressureMassive(
-            pointsCount,
+            PointsCount,
             parameters,
             rpm,
             staticPressure1,
@@ -38,7 +38,7 @@ public static class PaintDiagramHelper
             diameter);
 
         var (_, totalPressures) = CalculationDiagramHelper.GetTotalPressureMassive(
-            pointsCount,
+            PointsCount,
             parameters,
             rpm,
             staticPressure1,
@@ -51,7 +51,7 @@ public static class PaintDiagramHelper
             diameter);
 
         var (_, powers) = CalculationDiagramHelper.GetPowerMassive(
-            pointsCount,
+            PointsCount,
             parameters,
             rpm,
             staticPressure1,
@@ -119,7 +119,7 @@ public static class PaintDiagramHelper
             : totalPressureWorkPoint.flowRate;
 
         var (flowRates1, pressureResistances) = CalculationDiagramHelper.GetPressureResistanceMassive(
-            pointsCount, flowRateForResistance, parameters);
+            PointsCount, flowRateForResistance, parameters);
 
         var resistancePlot = aerodynamicPlot.Add.Scatter(flowRates1, pressureResistances);
         resistancePlot.LegendText = "Характеристика сети";
@@ -349,7 +349,6 @@ public static class PaintDiagramHelper
         double diameter,
         int rpm)
     {
-        int pointsCount = 100;
         var pressureWorkPoint = FindIntersectionPresurePoint(
             parameters,
             staticPressure1,
@@ -362,8 +361,16 @@ public static class PaintDiagramHelper
             diameter,
             rpm);
 
+        if (parameters.NalichieVFD == true)
+        {
+            rpm = PaintDiagramsHelper.GetRpmVFD(
+                parameters.SystemResistance,
+                rpm,
+                pressureWorkPoint.pressure);
+        }
+
         var (rpmValues, nominalTorques) = CalculationDiagramHelper.GetNominalTorqueMassive(
-            pointsCount,
+            PointsCount,
             pressureWorkPoint.flowRate,
             parameters,
             rpm,
@@ -379,7 +386,7 @@ public static class PaintDiagramHelper
             diameter);
 
         var (_, torqueWithGates) = CalculationDiagramHelper.GetTorqueWithGateMassive(
-            pointsCount,
+            PointsCount,
             pressureWorkPoint.flowRate,
             parameters,
             rpm,
@@ -440,7 +447,7 @@ public static class PaintDiagramHelper
         var flowRateMax1 = parameters.FlowRateRequired * 2;
 
         var (flowRates, pressures) = CalculationDiagramHelper.GetTotalPressureMassive(
-        pointsCount,
+        PointsCount,
         parameters,
         rpm,
         staticPressure1,
@@ -453,14 +460,14 @@ public static class PaintDiagramHelper
         diameter);
 
         var (flowRates1, pressureResistances) = CalculationDiagramHelper.GetPressureResistanceMassive(
-            pointsCount,
+            PointsCount,
             flowRateMax1,
             parameters);
 
         if (parameters.TypeOfPressure == 0)
         {
             (flowRates, pressures) = CalculationDiagramHelper.GetStaticPressureMassive(
-             pointsCount,
+             PointsCount,
              parameters,
              rpm,
              staticPressure1,
@@ -485,7 +492,7 @@ public static class PaintDiagramHelper
         if (double.IsNaN(minX) || double.IsNaN(maxX) || maxX <= minX)
             return (double.NaN, double.NaN);
 
-        int samples = 200;
+        int samples = 10;
         double step = (maxX - minX) / samples;
         double xPrev = minX;
         double fPrev = diff(xPrev);

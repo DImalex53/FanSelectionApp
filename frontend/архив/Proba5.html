@@ -576,12 +576,13 @@
                                     <option value="0">По статическому давлению</option>
                                     <option value="1">По полному давлению</option>
                                 </select>
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">Наличие преобразователя частоты</label>
-                                <div class="checkbox-group">
-                                    <input type="checkbox" id="NalichieVFDInput" name="NalichieVFD">
-                                    <label for="NalichieVFDInput">Предусмотрен</label>
+			    </div>
+			    <div class="input-group">
+                                <label for="NalichieVFDInput" class="input-label">Наличие преобразователя</label>
+                                <select id="NalichieVFDInput" name="TypeOfPressure" class="select-field" required>
+                                    <option value="false">Нет</option>
+                                    <option value="true">Есть</option>
+				</select>
                                 </div>
                             </div>
                         </div>

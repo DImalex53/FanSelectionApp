@@ -6,6 +6,7 @@ public static class PaintDiagramsHelper
     private const int MaxRPM = 3000;
     private const double MinDiameter = 0.4;
     private const double MaxDiameter = 3;
+    private const int MaxHalfPoluces = 6;
 
     public static List<DatasRightVents> GenerateTableOfRightVents
         (
@@ -60,12 +61,11 @@ public static class PaintDiagramsHelper
         var nameOfFan = parameters.SuctionType == 1 ? aerodynamicRow.NewMarkOfFand : aerodynamicRow.NewMarkOfFan;
 
         double diameter = MinDiameter;
-        int maxHalfPoluces = parameters.NalichieVFD == true ? 61 : 6;
         int minHalfPoluces = 1;
         int rpm;
         for (int k = 0; diameter < MaxDiameter; k++)
         {
-            for (int halfPoluces = maxHalfPoluces; halfPoluces > 0; halfPoluces--)
+            for (int halfPoluces = MaxHalfPoluces; halfPoluces > 0; halfPoluces--)
             {
                 if (halfPoluces < minHalfPoluces)
                 {
@@ -159,6 +159,24 @@ public static class PaintDiagramsHelper
                     continue;
                 }
 
+                if (parameters.NalichieVFD == true)
+                {
+                    rpm = PaintDiagramsHelper.GetRpmVFD(
+                        parameters.SystemResistance, 
+                        rpm, 
+                        PaintDiagramHelper.FindIntersectionPresurePoint(
+                            parameters,
+                            staticPressure1,
+                            staticPressure2,
+                            staticPressure3,
+                            outletLength,
+                            outletWidth,
+                            minDeltaEfficiency,
+                            maxDeltaEfficiency,
+                            diameter,
+                            rpm).pressure);
+                }
+
                 var aerodynamicPlotBytes = PaintDiagramHelper.GetDiagramAsImageBytes(
                     parameters,
                     staticPressure1,
@@ -199,6 +217,16 @@ public static class PaintDiagramsHelper
         }
 
         return result;
+    }
+
+public static int GetRpmVFD
+        (
+        double pressureRequired,
+        int rpm,
+        double intersectionPressure
+        )
+    {
+        return (int) Math.Ceiling(rpm * Math.Pow(pressureRequired / intersectionPressure, 0.5));
     }
 }
 
