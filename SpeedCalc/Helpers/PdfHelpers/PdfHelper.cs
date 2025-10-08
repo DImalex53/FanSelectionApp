@@ -267,10 +267,17 @@ public static class PdfExporter
                     5 => "Общепромышленное",
                     _ => "Общепромышленное"
                 };
-
-                var powerWorkPoint = CalculationDiagramHelper.GetPolinomPower(parameters.FlowRateRequired, datas, parameters);
-                var totalPressureWorkPoint = CalculationDiagramHelper.GetPolinomTotalPressure(parameters.FlowRateRequired, datas, parameters);
-                var totalEficiencyWorkPoint = CalculationDiagramHelper.GetPolinomEeficiency(parameters.FlowRateRequired, datas, parameters);
+                var rpm = parameters.Rpm;
+                if (parameters.NalichieVFD == true)
+                {
+                    rpm = PaintDiagramsHelper.GetRpmVFD(
+                        parameters.SystemResistance,
+                        rpm,
+                        PaintDiagramsHelper.FindIntersectionPresurePoint(parameters, datas, rpm).pressure);
+                }
+                var powerWorkPoint = CalculationDiagramHelper.GetPolinomPower(parameters.FlowRateRequired, datas, parameters, rpm);
+                var totalPressureWorkPoint = CalculationDiagramHelper.GetPolinomTotalPressure(parameters.FlowRateRequired, datas, parameters, rpm);
+                var totalEficiencyWorkPoint = CalculationDiagramHelper.GetPolinomEeficiency(parameters.FlowRateRequired, datas, parameters, rpm);
                 var aerodynamicRow = AerodinamicRowHelper.GetAerodinamicRow(datas, parameters);
                 var nomberOfBlades = aerodynamicRow.NumberOfBlades;
                 if (parameters.SuctionType == 1) { nomberOfBlades = nomberOfBlades * 2; }
@@ -364,6 +371,13 @@ public static class PdfExporter
                 double paramsYPos = 140;
                 var motorVoltage = parameters.MotorVoltage;
                 var rpm = parameters.Rpm;
+                if (parameters.NalichieVFD == true)
+                {
+                    rpm = PaintDiagramsHelper.GetRpmVFD(
+                        parameters.SystemResistance, 
+                        rpm, 
+                        PaintDiagramsHelper.FindIntersectionPresurePoint(parameters, datas, rpm).pressure);
+                }
                 var klimatic = parameters.Klimatic;
                 var markOfVzrivMotor = parameters.MarkOfVzrivMotor;
                 var VFD = "не предусмотрен";
@@ -371,7 +385,7 @@ public static class PdfExporter
                 if (parameters.NalichieVFD) { VFD = "предусмотрен"; }
 
                 var momentOfInertcia = CalculationMomentOfInertciaHelper.GetMomentOfInertcia(datas, parameters);
-                var shaftPower = CalculationDiagramHelper.GetPolinomPower(parameters.FlowRateRequired, datas, parameters);
+                var shaftPower = CalculationDiagramHelper.GetPolinomPower(parameters.FlowRateRequired, datas, parameters, rpm);
 
                 var parametersOfMotor = new List<string>
             {

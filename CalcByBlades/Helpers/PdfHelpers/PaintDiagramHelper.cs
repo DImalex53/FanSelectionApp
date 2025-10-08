@@ -70,7 +70,7 @@ public static class PaintDiagramHelper
         Plot aerodynamicPlot = new();
 
         // БАЗОВЫЕ НАСТРОЙКИ
-        aerodynamicPlot.Title($"Вентилятор {nameOfFan}-{diameter * 10:F1}_{rpm} об/мин");
+        aerodynamicPlot.Title($"Вентилятор {nameOfFan}-{diameter * 10:F1}_{rpm} об/мин_{parameters.Density} кг/м³");
         aerodynamicPlot.XLabel("Расход воздуха, м³/ч");
         aerodynamicPlot.YLabel("Давление, Па");
 

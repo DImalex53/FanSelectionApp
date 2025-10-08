@@ -178,6 +178,11 @@ public class CalculationParameters
     public bool NalichieVFD { get; set; } = false;
 
     /// <summary>
+    /// Диапазон регулирования (10..50 Гц, 10..60 Гц)
+    /// </summary>
+    public string? RangeOfVFD { get; set; } = null;
+
+    /// <summary>
     /// Название проекта
     /// </summary>
     public string ProjectName { get; set; } = "Изготовление и поставка тягодутьевой машины";

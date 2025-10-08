@@ -22,7 +22,11 @@ public class SelectedFanParameters : CalculationParameters
     /// </summary>
     public int Rpm { get; set; } = 990;
 
-    public string RightScheme { get; set; }
+    /// <summary>
+    /// Выбранная схема
+    /// (основной)
+    /// </summary>
+    public string ChooseScheme { get; set; }
 
 
 }

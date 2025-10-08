@@ -24,28 +24,35 @@ public class PaintDiagramsHelper
 
         var diameter = CalculationDiameterHelper.GetDiameter(datas, parameters);
 
-        var workPoint = PaintDiagramsHelper.FindIntersectionPresurePoint(parameters, datas);
+        var rpm = parameters.Rpm;
 
-        var (flowRates, staticPressures) = CalculationDiagramHelper.GetStaticPressureMassive(pointsCount, parameters, datas);
+        var workPoint = PaintDiagramsHelper.FindIntersectionPresurePoint(parameters, datas, rpm);
 
-        var (_, totalPressures) = CalculationDiagramHelper.GetTotalPressureMassive(pointsCount, parameters, datas);
+        if (parameters.NalichieVFD == true)
+        {
+            rpm = PaintDiagramsHelper.GetRpmVFD(parameters.SystemResistance,rpm,workPoint.pressure);
+        }
 
-        var (_, powers) = CalculationDiagramHelper.GetPowerMassive(pointsCount, parameters, datas);
+        var (flowRates, staticPressures) = CalculationDiagramHelper.GetStaticPressureMassive(pointsCount, parameters, datas, rpm);
+
+        var (_, totalPressures) = CalculationDiagramHelper.GetTotalPressureMassive(pointsCount, parameters, datas, rpm);
+
+        var (_, powers) = CalculationDiagramHelper.GetPowerMassive(pointsCount, parameters, datas, rpm);
         var (flowRates1, pressureResistances) = CalculationDiagramHelper.GetPressureResistanceMassive(
             pointsCount, parameters, workPoint.flowRate);
 
         var totalPressureWorkPoint = CalculationDiagramHelper.GetPolinomTotalPressure(workPoint.flowRate,
-        datas, parameters);
+        datas, parameters, rpm);
 
         var totalEficiencyWorkPoint = CalculationDiagramHelper.GetPolinomEeficiency(workPoint.flowRate,
-        datas, parameters);
+        datas, parameters, rpm);
 
-        var powerWorkPoint = CalculationDiagramHelper.GetPolinomPower(workPoint.flowRate, datas, parameters);
+        var powerWorkPoint = CalculationDiagramHelper.GetPolinomPower(workPoint.flowRate, datas, parameters, rpm);
 
         var staticPressureWorkPoint = workPoint.pressure;
 
         var staticEficiencyWorkPoint = CalculationDiagramHelper.GetPolinomStaticEficiency(workPoint.flowRate,
-          datas, parameters);
+          datas, parameters, rpm);
 
         var markImpeller = aerodynamicRow.NewMarkOfFan;
         if (parameters.SuctionType == 1)
@@ -54,7 +61,7 @@ public class PaintDiagramsHelper
         }
 
         var aerodynamicPlot = new Plot();
-        aerodynamicPlot.Title($"ТДМ {markImpeller}-{diameter * 10:F1} {parameters.Density} кг/м3 {parameters.Rpm} об/мин");
+        aerodynamicPlot.Title($"ТДМ {markImpeller}-{diameter * 10:F1}_{rpm} об/мин_{parameters.Density} кг/м3");
         aerodynamicPlot.XLabel("Расход воздуха, м³/ч");
         aerodynamicPlot.Axes.Left.Label.Text = "Давление, Па";
         aerodynamicPlot.Axes.Right.Label.Text = "Мощность, кВт";
@@ -199,14 +206,16 @@ public class PaintDiagramsHelper
     }
     public static (double flowRate, double pressure) FindIntersectionPresurePoint(
            SpeedCalculationParameters parameters,
-           List<AerodynamicsData> datas)
+           List<AerodynamicsData> datas,
+           int rpm)
     {
         var flowRateMax1 = parameters.FlowRateRequired * 2;
 
         var (flowRates, pressures) = CalculationDiagramHelper.GetStaticPressureMassive(
         pointsCount,
         parameters,
-        datas);
+        datas,
+        rpm);
 
         var (flowRates1, pressureResistances) = CalculationDiagramHelper.GetPressureResistanceMassive(
             pointsCount,
@@ -250,6 +259,15 @@ public class PaintDiagramsHelper
             fPrev = fCurr;
         }
         return (double.NaN, double.NaN);
+    }
+    public static int GetRpmVFD
+        (
+        double pressureRequired,
+        int rpm,
+        double intersectionPressure
+        )
+    {
+        return (int)Math.Ceiling(rpm * Math.Pow(pressureRequired / intersectionPressure, 0.5));
     }
 }
 

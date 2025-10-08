@@ -115,7 +115,7 @@ public static class PaintDiagramsHelper
                     efficiency4, 
                     diameter);
 
-                if (parameters.SystemResistance > pressure)
+                if (parameters.SystemResistance > pressure && parameters.NalichieVFD == false)
                 {
                     continue;
                 }
@@ -175,6 +175,10 @@ public static class PaintDiagramsHelper
                             maxDeltaEfficiency,
                             diameter,
                             rpm).pressure);
+                }
+                if (rpm > MaxRPM)
+                {
+                    continue;
                 }
 
                 var aerodynamicPlotBytes = PaintDiagramHelper.GetDiagramAsImageBytes(
