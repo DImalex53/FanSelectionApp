@@ -181,6 +181,15 @@
             background-color: #4b5563;
         }
 
+        .btn.cancel-selection-btn {
+            background-color: #d97706;
+            margin-left: 10px;
+        }
+
+        .btn.cancel-selection-btn:hover:not(:disabled) {
+            background-color: #b45309;
+        }
+
         .hidden {
             display: none !important;
         }
@@ -330,6 +339,10 @@
             margin-bottom: 25px;
         }
 
+        .full-width-input {
+            grid-column: 1 / -1;
+        }
+
         .fixed-params {
             background: #f8fafc;
             border-radius: 12px;
@@ -462,16 +475,6 @@
             height: auto;
         }
 
-        /* Кнопка отмены подбора */
-        .btn.cancel-selection-btn {
-            background-color: #d97706;
-            margin-left: 10px;
-        }
-
-        .btn.cancel-selection-btn:hover:not(:disabled) {
-            background-color: #b45309;
-        }
-
         /* Стили для больших текстовых полей */
         .textarea-field {
             padding: 12px 16px;
@@ -494,6 +497,31 @@
 
         .input-group textarea {
             min-height: 80px;
+        }
+
+        /* Стили для выбранного графика */
+        .selected-graph-container {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 2px solid #2563eb;
+        }
+
+        .selected-graph-image {
+            max-width: 800px;
+            width: 100%;
+            height: auto;
+            margin: 0 auto;
+        }
+
+        .buttons-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
         }
     </style>
 </head>
@@ -546,6 +574,17 @@
                                 <option value="4">Абразив</option>
                             </select>
                         </div>
+                        <div class="input-group">
+                            <label for="SpeedCalcNalichieVFD" class="input-label">Наличие преобразователя частоты</label>
+                            <select id="SpeedCalcNalichieVFD" name="NalichieVFD" class="select-field" required>
+                                <option value="false">Не предусмотрен</option>
+                                <option value="true">Предусмотрен</option>
+                            </select>
+                        </div>
+                        <div class="input-group hidden" id="SpeedCalcRangeOfVFDGroup">
+                            <label for="SpeedCalcRangeOfVFD" class="input-label">Диапазон регулирования</label>
+                            <input type="text" id="SpeedCalcRangeOfVFD" name="RangeOfVFD" class="input-field" placeholder="10..50 Гц, 10..60 Гц">
+                        </div>
                     </div>
                     
                     <div class="text-center">
@@ -561,8 +600,175 @@
                         <img id="speedCalcImage" class="speedcalc-graph" alt="График быстроходности">
                     </div>
                     <div class="download-section">
-                        <h3>Скачать техническое предложение</h3>
-                        <button type="button" id="downloadSpeedCalcBtn" class="btn secondary-btn">Скачать PDF</button>
+                        <h3>Скачать результаты</h3>
+                        <div class="buttons-container">
+                            <button type="button" id="downloadSpeedCalcGraphBtn" class="btn secondary-btn">Скачать график</button>
+                            <button type="button" id="downloadSpeedCalcPdfBtn" class="btn secondary-btn">Сформировать PDF</button>
+                        </div>
+                    </div>
+
+                    <!-- Дополнительные параметры для SpeedCalc PDF -->
+                    <div id="speedCalcAdditionalParams" class="additional-params hidden">
+                        <h3>Дополнительные параметры для технического предложения</h3>
+                        <form id="speedCalcAdditionalParamsForm">
+                            <div class="params-grid">
+                                <div class="input-group">
+                                    <label for="SpeedCalcMotorVoltage" class="input-label">Напряжение сети, В</label>
+                                    <input type="number" step="0.01" id="SpeedCalcMotorVoltage" name="MotorVoltage" value="380" class="input-field" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="SpeedCalcMaterialDesign" class="input-label">Материальное исполнение ТДМ</label>
+                                    <select id="SpeedCalcMaterialDesign" name="MaterialDesign" class="select-field" required>
+                                        <option value="1">K1</option>
+                                        <option value="2">B</option>
+                                        <option value="3">BK1</option>
+                                        <option value="4">Ti</option>
+                                        <option value="5" selected>Стандарт</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label for="SpeedCalcMaterialOfImpeller" class="input-label">Материал рабочего колеса</label>
+                                    <input type="text" id="SpeedCalcMaterialOfImpeller" name="MaterialOfImpeller" value="09Г2С" class="input-field" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="SpeedCalcMaterialOfUlita" class="input-label">Материал корпуса улиты</label>
+                                    <input type="text" id="SpeedCalcMaterialOfUlita" name="MaterialOfUlita" value="09Г2С" class="input-field" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="SpeedCalcMaterialOfRama" class="input-label">Материал рамы</label>
+                                    <input type="text" id="SpeedCalcMaterialOfRama" name="MaterialOfRama" value="09Г2С" class="input-field" required>
+                                </div>
+                                <div class="input-group full-width-input">
+                                    <label for="SpeedCalcProjectName" class="input-label">Название проекта</label>
+                                    <textarea id="SpeedCalcProjectName" name="ProjectName" class="textarea-field" required>Изготовление и поставка тягодутьевой машины</textarea>
+                                </div>
+                                <div class="input-group">
+                                    <label for="SpeedCalcNumberOfTask" class="input-label">Номер задачи в Bitrix24</label>
+                                    <input type="number" id="SpeedCalcNumberOfTask" name="NumberOfTask" class="input-field">
+                                </div>
+                                <div class="input-group">
+                                    <label for="SpeedCalcConstructScheme" class="input-label">Конструктивное исполнение</label>
+                                    <select id="SpeedCalcConstructScheme" name="ConstructScheme" class="select-field">
+                                        <option value="">Не выбрано</option>
+                                        <option value="1">Схема 1</option>
+                                        <option value="2">Схема 2</option>
+                                        <option value="3">Схема 3</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label for="SpeedCalcRotaitionDirection" class="input-label">Направление вращения</label>
+                                    <select id="SpeedCalcRotaitionDirection" name="RotaitionDirection" class="select-field">
+                                        <option value="0">Правое</option>
+                                        <option value="1">Левое</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label for="SpeedCalcExhaustDirection" class="input-label">Угол разворота корпуса</label>
+                                    <input type="number" id="SpeedCalcExhaustDirection" name="ExhaustDirection" class="input-field">
+                                </div>
+                                <div class="input-group">
+                                    <label for="SpeedCalcMuftType" class="input-label">Тип муфты</label>
+                                    <input type="text" id="SpeedCalcMuftType" name="MuftType" class="input-field">
+                                </div>
+                                <div class="input-group full-width-input">
+                                    <label for="SpeedCalcTypeOfPPO" class="input-label">Тип ходовой части</label>
+                                    <textarea id="SpeedCalcTypeOfPPO" name="TypeOfPPO" class="textarea-field"></textarea>
+                                </div>
+                                <div class="input-group">
+                                    <label for="SpeedCalcKlimatic" class="input-label">Климатическое исполнение</label>
+                                    <input type="text" id="SpeedCalcKlimatic" name="Klimatic" class="input-field">
+                                </div>
+                                <div class="input-group full-width-input">
+                                    <label for="SpeedCalcDopTrebovaniyaMotor" class="input-label">Доп. требования к электродвигателю</label>
+                                    <textarea id="SpeedCalcDopTrebovaniyaMotor" name="DopTrebovaniyaMotor" class="textarea-field"></textarea>
+                                </div>
+                                <div class="input-group full-width-input">
+                                    <label for="SpeedCalcShaftSeal" class="input-label">Тип уплотнения вала</label>
+                                    <textarea id="SpeedCalcShaftSeal" name="ShaftSeal" class="textarea-field"></textarea>
+                                </div>
+                                <div class="input-group">
+                                    <label for="SpeedCalcTypeOfCompensatorInlet" class="input-label">Тип компенсатора на входе</label>
+                                    <input type="text" id="SpeedCalcTypeOfCompensatorInlet" name="TypeOfCompensatorInlet" class="input-field">
+                                </div>
+                                <div class="input-group">
+                                    <label for="SpeedCalcTypeOfCompensatorOutlet" class="input-label">Тип компенсатора на выходе</label>
+                                    <input type="text" id="SpeedCalcTypeOfCompensatorOutlet" name="TypeOfCompensatorOutlet" class="input-field">
+                                </div>
+                                <div class="input-group full-width-input">
+                                    <label for="SpeedCalcVibroSensorPPO" class="input-label">Датчики вибрации ходовой части</label>
+                                    <textarea id="SpeedCalcVibroSensorPPO" name="VibroSensorPPO" class="textarea-field"></textarea>
+                                </div>
+                                <div class="input-group full-width-input">
+                                    <label for="SpeedCalcTempSensorPPO" class="input-label">Датчики температуры ходовой части</label>
+                                    <textarea id="SpeedCalcTempSensorPPO" name="TempSensorPPO" class="textarea-field"></textarea>
+                                </div>
+                                <div class="input-group full-width-input">
+                                    <label for="SpeedCalcVibroSensorMotor" class="input-label">Датчики вибрации электродвигателя</label>
+                                    <textarea id="SpeedCalcVibroSensorMotor" name="VibroSensorMotor" class="textarea-field"></textarea>
+                                </div>
+                                <div class="input-group">
+                                    <label for="SpeedCalcMarkOfVzrivMotor" class="input-label">Маркировка взрывозащиты</label>
+                                    <input type="text" id="SpeedCalcMarkOfVzrivMotor" name="MarkOfVzrivMotor" class="input-field">
+                                </div>
+                                <div class="input-group full-width-input">
+                                    <label for="SpeedCalcDopKomplekt" class="input-label">Дополнительная комплектация</label>
+                                    <textarea id="SpeedCalcDopKomplekt" name="DopKomplekt" class="textarea-field"></textarea>
+                                </div>
+                                <div class="input-group full-width-input">
+                                    <label for="SpeedCalcDopTrebovanyaTDM" class="input-label">Доп. требования к ТДМ</label>
+                                    <textarea id="SpeedCalcDopTrebovanyaTDM" name="DopTrebovanyaTDM" class="textarea-field"></textarea>
+                                </div>
+                                <div class="input-group full-width-input">
+                                    <label for="SpeedCalcZip" class="input-label">ЗиП</label>
+                                    <textarea id="SpeedCalcZip" name="Zip" class="textarea-field"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Чекбоксы -->
+                            <div style="margin: 20px 0;">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="SpeedCalcVibroisolation" name="Vibroisolation">
+                                    <label for="SpeedCalcVibroisolation">Виброизоляция</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="SpeedCalcGuideVane" name="GuideVane">
+                                    <label for="SpeedCalcGuideVane">Направляющий аппарат</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="SpeedCalcTeploisolation" name="Teploisolation">
+                                    <label for="SpeedCalcTeploisolation">Теплошумоизолирующий кожух</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="SpeedCalcFlangeOutlet" name="FlangeOutlet">
+                                    <label for="SpeedCalcFlangeOutlet">Ответный фланец на линии "ВХОД"</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="SpeedCalcFlangeInlet" name="FlangeInlet">
+                                    <label for="SpeedCalcFlangeInlet">Ответный фланец на линии "НАГНЕТАНИЯ"</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="SpeedCalcNalichieVFD" name="NalichieVFD">
+                                    <label for="SpeedCalcNalichieVFD">Наличие преобразователя частоты</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="SpeedCalcShefMontage" name="ShefMontage">
+                                    <label for="SpeedCalcShefMontage">Шеф-монтаж</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="SpeedCalcPuskoNaladka" name="PuskoNaladka">
+                                    <label for="SpeedCalcPuskoNaladka">Пуско-наладочные работы</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="SpeedCalcStudyOfPersonal" name="StudyOfPersonal">
+                                    <label for="SpeedCalcStudyOfPersonal">Обучение персонала</label>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <button type="button" id="speedCalcDownloadPdfBtn" class="btn secondary-btn">Скачать техническое предложение</button>
+                                <button type="button" id="speedCalcResetBtn" class="btn reset-btn">Новый подбор</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -617,6 +823,10 @@
                                     <option value="false">Не предусмотрен</option>
                                     <option value="true">Предусмотрен</option>
                                 </select>
+                            </div>
+                            <div class="input-group hidden" id="RangeOfVFDGroup">
+                                <label for="RangeOfVFD" class="input-label">Диапазон регулирования</label>
+                                <input type="text" id="RangeOfVFD" name="RangeOfVFD" class="input-field" placeholder="10..50 Гц, 10..60 Гц">
                             </div>
                         </div>
                         
@@ -695,8 +905,15 @@
                         <!-- Графики будут добавлены динамически -->
                     </div>
                     
-                    <!-- Кнопка подтверждения выбора -->
-                    <button type="button" id="confirmSelectionBtn" class="btn confirm-btn hidden">Подтвердить выбор графика</button>
+                    <!-- Выбранный график -->
+                    <div id="selectedGraphContainer" class="selected-graph-container hidden">
+                        <h3>Выбранный график</h3>
+                        <img id="selectedGraphImage" class="selected-graph-image" alt="Выбранный график">
+                        <div class="buttons-container">
+                            <button type="button" id="downloadSelectedGraphBtn" class="btn secondary-btn">Скачать график</button>
+                            <button type="button" id="showAdditionalParamsBtn" class="btn secondary-btn">Сформировать PDF</button>
+                        </div>
+                    </div>
                     
                     <!-- Дополнительные параметры -->
                     <div id="additionalParams" class="additional-params hidden">
@@ -706,14 +923,6 @@
                                 <div class="input-group">
                                     <label for="MotorVoltage" class="input-label">Напряжение сети, В</label>
                                     <input type="number" step="0.01" id="MotorVoltage" name="MotorVoltage" value="380" class="input-field" required>
-                                </div>
-                                <div class="input-group">
-                                    <label for="StartInletDensity" class="input-label">Плотность среды во время пуска, кг/м³</label>
-                                    <input type="number" step="0.01" id="StartInletDensity" name="StartInletDensity" value="1.204" class="input-field" required>
-                                </div>
-                                <div class="input-group">
-                                    <label for="MaterialDensyti" class="input-label">Плотность материала РК, кг/м³</label>
-                                    <input type="number" step="0.01" id="MaterialDensyti" name="MaterialDensyti" value="8000" class="input-field" required>
                                 </div>
                                 <div class="input-group">
                                     <label for="MaterialDesign" class="input-label">Материальное исполнение ТДМ</label>
@@ -737,16 +946,16 @@
                                     <label for="MaterialOfRama" class="input-label">Материал рамы</label>
                                     <input type="text" id="MaterialOfRama" name="MaterialOfRama" value="09Г2С" class="input-field" required>
                                 </div>
-                                <div class="input-group">
+                                <div class="input-group full-width-input">
                                     <label for="ProjectName" class="input-label">Название проекта</label>
-                                    <input type="text" id="ProjectName" name="ProjectName" value="Изготовление и поставка тягодутьевой машины" class="input-field" required>
+                                    <textarea id="ProjectName" name="ProjectName" class="textarea-field" required>Изготовление и поставка тягодутьевой машины</textarea>
                                 </div>
                                 <div class="input-group">
                                     <label for="NumberOfTask" class="input-label">Номер задачи в Bitrix24</label>
                                     <input type="number" id="NumberOfTask" name="NumberOfTask" class="input-field">
                                 </div>
                                 <div class="input-group">
-                                    <label for="ConstructScheme" class="input-label">Схема конструктивного исполнения</label>
+                                    <label for="ConstructScheme" class="input-label">Конструктивное исполнение</label>
                                     <select id="ConstructScheme" name="ConstructScheme" class="select-field">
                                         <option value="">Не выбрано</option>
                                         <option value="1">Схема 1</option>
@@ -762,28 +971,28 @@
                                     </select>
                                 </div>
                                 <div class="input-group">
-                                    <label for="ExhaustDirection" class="input-label">Угол разворота корпуса, градусы</label>
+                                    <label for="ExhaustDirection" class="input-label">Угол разворота корпуса</label>
                                     <input type="number" id="ExhaustDirection" name="ExhaustDirection" class="input-field">
                                 </div>
                                 <div class="input-group">
                                     <label for="MuftType" class="input-label">Тип муфты</label>
                                     <input type="text" id="MuftType" name="MuftType" class="input-field">
                                 </div>
-                                <div class="input-group">
+                                <div class="input-group full-width-input">
                                     <label for="TypeOfPPO" class="input-label">Тип ходовой части</label>
-                                    <input type="text" id="TypeOfPPO" name="TypeOfPPO" class="input-field">
+                                    <textarea id="TypeOfPPO" name="TypeOfPPO" class="textarea-field"></textarea>
                                 </div>
                                 <div class="input-group">
                                     <label for="Klimatic" class="input-label">Климатическое исполнение</label>
                                     <input type="text" id="Klimatic" name="Klimatic" class="input-field">
                                 </div>
-                                <div class="input-group">
+                                <div class="input-group full-width-input">
                                     <label for="DopTrebovaniyaMotor" class="input-label">Доп. требования к электродвигателю</label>
                                     <textarea id="DopTrebovaniyaMotor" name="DopTrebovaniyaMotor" class="textarea-field"></textarea>
                                 </div>
-                                <div class="input-group">
+                                <div class="input-group full-width-input">
                                     <label for="ShaftSeal" class="input-label">Тип уплотнения вала</label>
-                                    <input type="text" id="ShaftSeal" name="ShaftSeal" class="input-field">
+                                    <textarea id="ShaftSeal" name="ShaftSeal" class="textarea-field"></textarea>
                                 </div>
                                 <div class="input-group">
                                     <label for="TypeOfCompensatorInlet" class="input-label">Тип компенсатора на входе</label>
@@ -793,31 +1002,31 @@
                                     <label for="TypeOfCompensatorOutlet" class="input-label">Тип компенсатора на выходе</label>
                                     <input type="text" id="TypeOfCompensatorOutlet" name="TypeOfCompensatorOutlet" class="input-field">
                                 </div>
-                                <div class="input-group">
+                                <div class="input-group full-width-input">
                                     <label for="VibroSensorPPO" class="input-label">Датчики вибрации ходовой части</label>
-                                    <input type="text" id="VibroSensorPPO" name="VibroSensorPPO" class="input-field">
+                                    <textarea id="VibroSensorPPO" name="VibroSensorPPO" class="textarea-field"></textarea>
                                 </div>
-                                <div class="input-group">
+                                <div class="input-group full-width-input">
                                     <label for="TempSensorPPO" class="input-label">Датчики температуры ходовой части</label>
-                                    <input type="text" id="TempSensorPPO" name="TempSensorPPO" class="input-field">
+                                    <textarea id="TempSensorPPO" name="TempSensorPPO" class="textarea-field"></textarea>
                                 </div>
-                                <div class="input-group">
+                                <div class="input-group full-width-input">
                                     <label for="VibroSensorMotor" class="input-label">Датчики вибрации электродвигателя</label>
-                                    <input type="text" id="VibroSensorMotor" name="VibroSensorMotor" class="input-field">
+                                    <textarea id="VibroSensorMotor" name="VibroSensorMotor" class="textarea-field"></textarea>
                                 </div>
                                 <div class="input-group">
                                     <label for="MarkOfVzrivMotor" class="input-label">Маркировка взрывозащиты</label>
                                     <input type="text" id="MarkOfVzrivMotor" name="MarkOfVzrivMotor" class="input-field">
                                 </div>
-                                <div class="input-group">
+                                <div class="input-group full-width-input">
                                     <label for="DopKomplekt" class="input-label">Дополнительная комплектация</label>
                                     <textarea id="DopKomplekt" name="DopKomplekt" class="textarea-field"></textarea>
                                 </div>
-                                <div class="input-group">
+                                <div class="input-group full-width-input">
                                     <label for="DopTrebovanyaTDM" class="input-label">Доп. требования к ТДМ</label>
                                     <textarea id="DopTrebovanyaTDM" name="DopTrebovanyaTDM" class="textarea-field"></textarea>
                                 </div>
-                                <div class="input-group">
+                                <div class="input-group full-width-input">
                                     <label for="Zip" class="input-label">ЗиП</label>
                                     <textarea id="Zip" name="Zip" class="textarea-field"></textarea>
                                 </div>
@@ -839,11 +1048,11 @@
                                 </div>
                                 <div class="checkbox-group">
                                     <input type="checkbox" id="FlangeOutlet" name="FlangeOutlet">
-                                    <label for="FlangeOutlet">Входной фланец</label>
+                                    <label for="FlangeOutlet">Ответный фланец на линии "ВХОД"</label>
                                 </div>
                                 <div class="checkbox-group">
                                     <input type="checkbox" id="FlangeInlet" name="FlangeInlet">
-                                    <label for="FlangeInlet">Выходной фланец</label>
+                                    <label for="FlangeInlet">Ответный фланец на линии "НАГНЕТАНИЯ"</label>
                                 </div>
                                 <div class="checkbox-group">
                                     <input type="checkbox" id="NalichieVFD" name="NalichieVFD">
@@ -864,7 +1073,7 @@
                             </div>
                             
                             <div class="text-center">
-                                <button type="button" id="downloadProposalBtn" class="btn secondary-btn" disabled>Скачать техническое предложение</button>
+                                <button type="button" id="downloadProposalBtn" class="btn secondary-btn">Скачать техническое предложение</button>
                                 <button type="button" id="resetSelectionBtn" class="btn reset-btn">Новый подбор</button>
                             </div>
                         </form>
@@ -893,6 +1102,7 @@
             direction: 'asc'
         };
         let originalGraphsOrder = [];
+        let speedCalcImageUrl = null;
 
         // Заглушка для изображения
         function getPlaceholderImage() {
@@ -1008,17 +1218,9 @@
             event.target.classList.add('active');
             
             clearMessages();
-            
-            // Не сбрасываем прогресс при переключении вкладок
-            if (tabName === 'bladescalc' && resultsShown) {
-                document.getElementById('inputParamsSection').classList.add('hidden');
-                document.getElementById('resultsContainer').classList.remove('hidden');
-            } else if (tabName === 'speedcalc') {
-                document.getElementById('speedCalcResults').classList.add('hidden');
-            }
         }
 
-        // Полный сброс подбора
+        // Полный сброс подбора для BladesCalc
         function resetSelection() {
             selectedGraphIndex = null;
             selectionConfirmed = false;
@@ -1026,9 +1228,10 @@
             
             document.getElementById('confirmSelectionBtn').classList.add('hidden');
             document.getElementById('additionalParams').classList.add('hidden');
-            document.getElementById('downloadProposalBtn').disabled = true;
+            document.getElementById('selectedGraphContainer').classList.add('hidden');
             document.getElementById('inputParamsSection').classList.remove('hidden');
             document.getElementById('resultsContainer').classList.add('hidden');
+            document.getElementById('cancelBladesCalcBtn').classList.add('hidden');
             
             // Показываем все графики снова
             document.querySelectorAll('.graph-card').forEach(card => {
@@ -1044,13 +1247,21 @@
         function cancelSpeedCalc() {
             document.getElementById('speedCalcResults').classList.add('hidden');
             document.getElementById('cancelSpeedCalcBtn').classList.add('hidden');
+            document.getElementById('speedCalcAdditionalParams').classList.add('hidden');
             showMessage('Подбор по быстроходности отменен', 'success');
         }
 
         // Отмена подбора для BladesCalc
         function cancelBladesCalc() {
             resetSelection();
-            document.getElementById('cancelBladesCalcBtn').classList.add('hidden');
+        }
+
+        // Сброс SpeedCalc
+        function resetSpeedCalc() {
+            document.getElementById('speedCalcResults').classList.add('hidden');
+            document.getElementById('cancelSpeedCalcBtn').classList.add('hidden');
+            document.getElementById('speedCalcAdditionalParams').classList.add('hidden');
+            showMessage('Подбор сброшен. Вы можете начать новый подбор.', 'success');
         }
 
         // Очистка сообщений
@@ -1089,16 +1300,25 @@
             updateFixedParams();
         });
 
-        // Проверка заполнения дополнительных параметров
-        document.getElementById('additionalParamsForm').addEventListener('input', function() {
-            const requiredFields = this.querySelectorAll('[required]');
-            let allFilled = true;
-            
-            requiredFields.forEach(field => {
-                if (!field.value) allFilled = false;
-            });
-            
-            document.getElementById('downloadProposalBtn').disabled = !allFilled;
+        // Обработчик изменения поля наличия преобразователя частоты для SpeedCalc
+        document.getElementById('SpeedCalcNalichieVFD').addEventListener('change', function() {
+            const rangeGroup = document.getElementById('SpeedCalcRangeOfVFDGroup');
+            if (this.value === 'true') {
+                rangeGroup.classList.remove('hidden');
+            } else {
+                rangeGroup.classList.add('hidden');
+            }
+        });
+
+        // Обработчик изменения поля наличия преобразователя частоты для BladesCalc
+        document.getElementById('NalichieVFDSelect').addEventListener('change', function() {
+            const rangeGroup = document.getElementById('RangeOfVFDGroup');
+            if (this.value === 'true') {
+                rangeGroup.classList.remove('hidden');
+            } else {
+                rangeGroup.classList.add('hidden');
+            }
+            updateFixedParams();
         });
 
         // Обработка кнопки "Построить график" для SpeedCalc
@@ -1116,6 +1336,12 @@
                     params[key] = value;
                 }
             });
+
+            // Добавляем параметр преобразователя частоты
+            params.NalichieVFD = document.getElementById('SpeedCalcNalichieVFD').value === 'true';
+            if (params.NalichieVFD) {
+                params.RangeOfVFD = document.getElementById('SpeedCalcRangeOfVFD').value;
+            }
 
             try {
                 console.log('Отправка запроса на построение графика с параметрами:', params);
@@ -1136,9 +1362,9 @@
                 }
 
                 const blob = await response.blob();
-                const imageUrl = URL.createObjectURL(blob);
+                speedCalcImageUrl = URL.createObjectURL(blob);
                 
-                displaySpeedCalcGraph(imageUrl, params);
+                displaySpeedCalcGraph(speedCalcImageUrl, params);
                 showMessage('График успешно построен', 'success');
                 
             } catch (error) {
@@ -1160,11 +1386,6 @@
                 NalichieVFD: document.getElementById('NalichieVFDSelect').value === 'true',
                 TypeOfChoose: 0,
                 MotorVoltage: 380,
-                StartInletDensity: 1.204,
-                MaterialDensyti: 8000,
-                Vibroisolation: false,
-                GuideVane: false,
-                Teploisolation: false,
                 MaterialDesign: 5,
                 MaterialOfImpeller: "09Г2С",
                 MaterialOfUlita: "09Г2С",
@@ -1176,6 +1397,11 @@
                 PuskoNaladka: false,
                 StudyOfPersonal: false
             };
+
+            // Добавляем диапазон регулирования если преобразователь есть
+            if (requestData.NalichieVFD) {
+                requestData.RangeOfVFD = document.getElementById('RangeOfVFD').value;
+            }
 
             document.getElementById('loading').style.display = 'block';
             clearMessages();
@@ -1300,35 +1526,94 @@
             if (selectionConfirmed) return;
             
             selectedGraphIndex = graphIndex;
+            const selectedGraph = allGraphsData[graphIndex];
             
             document.querySelectorAll('.graph-card').forEach(card => {
                 card.classList.remove('selected');
             });
             
             document.querySelector(`.graph-card[data-graph-index="${graphIndex}"]`).classList.add('selected');
-            document.getElementById('confirmSelectionBtn').classList.remove('hidden');
-        }
-
-        // Подтверждение выбора
-        document.getElementById('confirmSelectionBtn').addEventListener('click', function() {
-            if (selectedGraphIndex === null) return;
             
-            selectionConfirmed = true;
+            // Показываем выбранный график по центру
+            let imageUrl = getPlaceholderImage();
+            if (selectedGraph.diagramAsImageBytes) {
+                if (typeof selectedGraph.diagramAsImageBytes === 'string') {
+                    if (selectedGraph.diagramAsImageBytes.startsWith('data:image/')) {
+                        imageUrl = selectedGraph.diagramAsImageBytes;
+                    } else {
+                        imageUrl = `data:image/png;base64,${selectedGraph.diagramAsImageBytes}`;
+                    }
+                }
+            }
             
-            // НЕ скрываем другие графики, только подсвечиваем выбранный
+            document.getElementById('selectedGraphImage').src = imageUrl;
+            document.getElementById('selectedGraphContainer').classList.remove('hidden');
+            
+            // Скрываем остальные графики
             document.querySelectorAll('.graph-card').forEach((card, index) => {
-                if (index !== selectedGraphIndex) {
-                    card.classList.remove('selected');
-                } else {
-                    card.classList.add('selected');
+                if (index !== graphIndex) {
+                    card.style.display = 'none';
                 }
             });
             
-            document.getElementById('additionalParams').classList.remove('hidden');
-            document.getElementById('confirmSelectionBtn').classList.add('hidden');
-            document.getElementById('additionalParams').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('selectedGraphContainer').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Скачивание выбранного графика для BladesCalc
+        document.getElementById('downloadSelectedGraphBtn').addEventListener('click', function() {
+            if (selectedGraphIndex === null) {
+                showMessage('Выберите график для скачивания');
+                return;
+            }
+
+            const selectedGraph = allGraphsData[selectedGraphIndex];
+            let imageUrl = getPlaceholderImage();
             
-            showMessage('График выбран. Заполните дополнительные параметры для скачивания технического предложения.', 'success');
+            if (selectedGraph.diagramAsImageBytes) {
+                if (typeof selectedGraph.diagramAsImageBytes === 'string') {
+                    if (selectedGraph.diagramAsImageBytes.startsWith('data:image/')) {
+                        imageUrl = selectedGraph.diagramAsImageBytes;
+                    } else {
+                        imageUrl = `data:image/png;base64,${selectedGraph.diagramAsImageBytes}`;
+                    }
+                }
+            }
+
+            const a = document.createElement('a');
+            a.href = imageUrl;
+            a.download = `график_${selectedGraph.numberOfVent || 'вентилятор'}.png`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            showMessage('График успешно скачан', 'success');
+        });
+
+        // Показать дополнительные параметры для BladesCalc
+        document.getElementById('showAdditionalParamsBtn').addEventListener('click', function() {
+            document.getElementById('additionalParams').classList.remove('hidden');
+            document.getElementById('additionalParams').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Скачивание графика для SpeedCalc
+        document.getElementById('downloadSpeedCalcGraphBtn').addEventListener('click', function() {
+            if (!speedCalcImageUrl) {
+                showMessage('График не построен');
+                return;
+            }
+
+            const a = document.createElement('a');
+            a.href = speedCalcImageUrl;
+            a.download = 'график_быстроходности.png';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            showMessage('График успешно скачан', 'success');
+        });
+
+        // Показать дополнительные параметры для SpeedCalc
+        document.getElementById('downloadSpeedCalcPdfBtn').addEventListener('click', function() {
+            document.getElementById('speedCalcAdditionalParams').classList.remove('hidden');
+            document.getElementById('speedCalcAdditionalParams').scrollIntoView({ behavior: 'smooth' });
         });
 
         // Обработчики кнопок сортировки
@@ -1374,8 +1659,6 @@
             // Собираем дополнительные параметры
             const additionalParams = {
                 MotorVoltage: parseFloat(document.getElementById('MotorVoltage').value),
-                StartInletDensity: parseFloat(document.getElementById('StartInletDensity').value),
-                MaterialDensyti: parseFloat(document.getElementById('MaterialDensyti').value),
                 MaterialDesign: parseInt(document.getElementById('MaterialDesign').value),
                 MaterialOfImpeller: document.getElementById('MaterialOfImpeller').value,
                 MaterialOfUlita: document.getElementById('MaterialOfUlita').value,
@@ -1410,6 +1693,11 @@
                 DopTrebovanyaTDM: document.getElementById('DopTrebovanyaTDM').value || null,
                 Zip: document.getElementById('Zip').value || null
             };
+
+            // Добавляем диапазон регулирования если преобразователь есть
+            if (additionalParams.NalichieVFD) {
+                additionalParams.RangeOfVFD = document.getElementById('RangeOfVFD').value;
+            }
 
             // Объединяем параметры
             const downloadParams = {
@@ -1457,56 +1745,55 @@
             }
         });
 
-        // Кнопка нового подбора
-        document.getElementById('resetSelectionBtn').addEventListener('click', resetSelection);
-
         // Скачивание PDF для SpeedCalc
-        document.getElementById('downloadSpeedCalcBtn').addEventListener('click', async function() {
+        document.getElementById('speedCalcDownloadPdfBtn').addEventListener('click', async function() {
             if (!speedCalcParams) {
                 showMessage('Ошибка: параметры для скачивания не найдены');
                 return;
             }
 
-            // Собираем все параметры для SpeedCalc согласно классу CalculationParameters
+            // Собираем все параметры для SpeedCalc
             const speedCalcDownloadParams = {
                 ...speedCalcParams,
-                MotorVoltage: 380,
-                StartInletDensity: 1.204,
-                MaterialDensyti: 8000,
-                NumberOfTask: null,
-                ConstructScheme: null,
-                RotaitionDirection: 0,
-                ExhaustDirection: null,
-                Vibroisolation: false,
-                GuideVane: false,
-                Teploisolation: false,
-                MaterialDesign: 5,
-                MaterialOfImpeller: "09Г2С",
-                MaterialOfUlita: "09Г2С",
-                MaterialOfBoltsOfUlita: null,
-                MaterialOfRama: "09Г2С",
-                MuftType: null,
-                TypeOfPPO: null,
-                Klimatic: null,
-                DopTrebovaniyaMotor: null,
-                ShaftSeal: null,
-                TypeOfCompensatorInlet: null,
-                TypeOfCompensatorOutlet: null,
-                FlangeOutlet: false,
-                FlangeInlet: false,
-                VibroSensorPPO: null,
-                TempSensorPPO: null,
-                VibroSensorMotor: null,
-                MarkOfVzrivMotor: null,
-                NalichieVFD: false,
-                ProjectName: "Изготовление и поставка тягодутьевой машины",
-                DopKomplekt: null,
-                DopTrebovanyaTDM: null,
-                Zip: null,
-                ShefMontage: false,
-                PuskoNaladka: false,
-                StudyOfPersonal: false
+                MotorVoltage: parseFloat(document.getElementById('SpeedCalcMotorVoltage').value),
+                MaterialDesign: parseInt(document.getElementById('SpeedCalcMaterialDesign').value),
+                MaterialOfImpeller: document.getElementById('SpeedCalcMaterialOfImpeller').value,
+                MaterialOfUlita: document.getElementById('SpeedCalcMaterialOfUlita').value,
+                MaterialOfRama: document.getElementById('SpeedCalcMaterialOfRama').value,
+                ProjectName: document.getElementById('SpeedCalcProjectName').value,
+                NumberOfTask: document.getElementById('SpeedCalcNumberOfTask').value ? parseInt(document.getElementById('SpeedCalcNumberOfTask').value) : null,
+                ConstructScheme: document.getElementById('SpeedCalcConstructScheme').value ? parseInt(document.getElementById('SpeedCalcConstructScheme').value) : null,
+                RotaitionDirection: document.getElementById('SpeedCalcRotaitionDirection').value ? parseInt(document.getElementById('SpeedCalcRotaitionDirection').value) : 0,
+                ExhaustDirection: document.getElementById('SpeedCalcExhaustDirection').value ? parseInt(document.getElementById('SpeedCalcExhaustDirection').value) : null,
+                Vibroisolation: document.getElementById('SpeedCalcVibroisolation').checked,
+                GuideVane: document.getElementById('SpeedCalcGuideVane').checked,
+                Teploisolation: document.getElementById('SpeedCalcTeploisolation').checked,
+                FlangeOutlet: document.getElementById('SpeedCalcFlangeOutlet').checked,
+                FlangeInlet: document.getElementById('SpeedCalcFlangeInlet').checked,
+                NalichieVFD: document.getElementById('SpeedCalcNalichieVFD').checked,
+                ShefMontage: document.getElementById('SpeedCalcShefMontage').checked,
+                PuskoNaladka: document.getElementById('SpeedCalcPuskoNaladka').checked,
+                StudyOfPersonal: document.getElementById('SpeedCalcStudyOfPersonal').checked,
+                MuftType: document.getElementById('SpeedCalcMuftType').value || null,
+                TypeOfPPO: document.getElementById('SpeedCalcTypeOfPPO').value || null,
+                Klimatic: document.getElementById('SpeedCalcKlimatic').value || null,
+                DopTrebovaniyaMotor: document.getElementById('SpeedCalcDopTrebovaniyaMotor').value || null,
+                ShaftSeal: document.getElementById('SpeedCalcShaftSeal').value || null,
+                TypeOfCompensatorInlet: document.getElementById('SpeedCalcTypeOfCompensatorInlet').value || null,
+                TypeOfCompensatorOutlet: document.getElementById('SpeedCalcTypeOfCompensatorOutlet').value || null,
+                VibroSensorPPO: document.getElementById('SpeedCalcVibroSensorPPO').value || null,
+                TempSensorPPO: document.getElementById('SpeedCalcTempSensorPPO').value || null,
+                VibroSensorMotor: document.getElementById('SpeedCalcVibroSensorMotor').value || null,
+                MarkOfVzrivMotor: document.getElementById('SpeedCalcMarkOfVzrivMotor').value || null,
+                DopKomplekt: document.getElementById('SpeedCalcDopKomplekt').value || null,
+                DopTrebovanyaTDM: document.getElementById('SpeedCalcDopTrebovanyaTDM').value || null,
+                Zip: document.getElementById('SpeedCalcZip').value || null
             };
+
+            // Добавляем диапазон регулирования если преобразователь есть
+            if (speedCalcDownloadParams.NalichieVFD) {
+                speedCalcDownloadParams.RangeOfVFD = document.getElementById('SpeedCalcRangeOfVFD').value;
+            }
 
             try {
                 const response = await fetch('http://localhost:5238/api/SpeedCalcSelection/downloadfile', {
@@ -1522,7 +1809,7 @@
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'SpeedCalc.pdf';
+                    a.download = 'Техническое_предложение_быстроходность.pdf';
                     document.body.appendChild(a);
                     a.click();
                     a.remove();
@@ -1537,6 +1824,12 @@
                 showMessage(`Не удалось скачать техническое предложение: ${error.message}`);
             }
         });
+
+        // Кнопка нового подбора для BladesCalc
+        document.getElementById('resetSelectionBtn').addEventListener('click', resetSelection);
+
+        // Кнопка нового подбора для SpeedCalc
+        document.getElementById('speedCalcResetBtn').addEventListener('click', resetSpeedCalc);
 
         // Отображение графика для SpeedCalc
         function displaySpeedCalcGraph(imageUrl, params) {
